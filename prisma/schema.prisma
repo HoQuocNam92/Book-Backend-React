@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model Addresses {
+  id          Int        @id(map: "PK__Addresse__3213E83FB1D70DA3") @default(autoincrement())
+  user_id     Int?
+  address     String?    @db.NVarChar(255)
+  city        String?    @db.NVarChar(100)
+  phone       String?    @db.VarChar(20)
+  province_id Int?
+  district_id Int?
+  ward_id     Int?
+  Users       Users?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Addresses__user___4222D4EF")
+  Districts   Districts? @relation(fields: [district_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_District")
+  Provinces   Provinces? @relation(fields: [province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_Province")
+  Wards       Wards?     @relation(fields: [ward_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_Ward")
+  Orders      Orders[]
+}
+
+model Authors {
+  id          Int           @id(map: "PK__Authors__3213E83F3A86BF95") @default(autoincrement())
+  name        String?       @db.NVarChar(150)
+  bio         String?       @db.NVarChar(Max)
+  BookAuthors BookAuthors[]
+}
+
+model Banners {
+  id          Int         @id(map: "PK__Banners__3213E83FD7D6FF22") @default(autoincrement())
+  image_url   String      @db.NVarChar(255)
+  link_url    String?     @db.NVarChar(255)
+  category_id Int?
+  created_at  DateTime?   @default(now(), map: "DF__Banners__created__45BE5BA9") @db.DateTime
+  Categories  Categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Banners_Categories")
+}
+
+model BookAttributes {
+  id         Int    @id(map: "PK__BookAttr__3213E83F53214619") @default(autoincrement())
+  book_id    Int
+  attr_key   String @db.NVarChar(100)
+  attr_value String @db.NVarChar(255)
+  Books      Books  @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK_BookAttributes_Books")
+}
+
+model BookAuthors {
+  book_id   Int
+  author_id Int
+  Authors   Authors @relation(fields: [author_id], references: [id], onUpdate: NoAction, map: "FK__BookAutho__autho__571DF1D5")
+  Books     Books   @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK__BookAutho__book___5629CD9C")
+
+  @@id([book_id, author_id], map: "PK__BookAuth__A1680C5D3C1C8574")
+}
+
+model BookImages {
+  id      Int     @id(map: "PK__BookImag__3213E83FFAD37F57") @default(autoincrement())
+  book_id Int?
+  url     String? @db.VarChar(255)
+  Books   Books?  @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__BookImage__book___59FA5E80")
+}
+
+model BookPromotions {
+  id      Int    @id(map: "PK__BookProm__3213E83F55704361") @default(autoincrement())
+  book_id Int
+  content String @db.NVarChar(500)
+  Books   Books  @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK__BookPromo__book___15DA3E5D")
+}
+
+model Books {
+  id               Int              @id(map: "PK__Books__3213E83F9506B05C") @default(autoincrement())
+  title            String?          @db.NVarChar(200)
+  sale_price       Decimal?         @db.Decimal(12, 2)
+  price            Decimal?         @db.Decimal(12, 2)
+  stock            Int?
+  description      String?          @db.NVarChar(Max)
+  slug             String?          @db.NVarChar(255)
+  brand_id         Int?
+  category_id      Int?
+  discount_percent Int?             @default(0, map: "DF__Books__discount___2EDAF651")
+  created_at       DateTime?        @default(now(), map: "DF__Books__created_a__5165187F") @db.DateTime
+  BookAttributes   BookAttributes[]
+  BookAuthors      BookAuthors[]
+  BookImages       BookImages[]
+  BookPromotions   BookPromotions[]
+  Categories       Categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Books__category___52593CB8")
+  Brands           Brands?          @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Books_Brands")
+  CartItems        CartItems[]
+  OrderItems       OrderItems[]
+  Reviews          Reviews[]
+}
+
+model Brands {
+  id          Int       @id(map: "PK__Brands__3213E83FFFD870A9") @default(autoincrement())
+  name        String    @db.NVarChar(255)
+  slug        String?   @unique(map: "UQ__Brands__32DD1E4CD59669F4") @db.VarChar(255)
+  description String?   @db.NVarChar(Max)
+  logo_url    String?   @db.VarChar(500)
+  created_at  DateTime? @default(now(), map: "DF__Brands__created___76619304") @db.DateTime
+  Books       Books[]
+}
+
+model CartItems {
+  id       Int    @id(map: "PK__CartItem__3213E83F0289E763") @default(autoincrement())
+  cart_id  Int?
+  book_id  Int?
+  quantity Int?
+  Books    Books? @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__CartItems__book___619B8048")
+  Carts    Carts? @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__CartItems__cart___60A75C0F")
+}
+
+model Carts {
+  id        Int         @id(map: "PK__Carts__3213E83F8798F057") @default(autoincrement())
+  user_id   Int?        @unique(map: "UQ__Carts__B9BE370E09C8E48B")
+  CartItems CartItems[]
+  Users     Users?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Carts__user_id__5DCAEF64")
+}
+
+model Categories {
+  id               Int          @id(map: "PK__Categori__3213E83FC443AD7B") @default(autoincrement())
+  name             String?      @db.NVarChar(255)
+  slug             String?      @db.VarChar(255)
+  parent_id        Int?
+  Banners          Banners[]
+  Books            Books[]
+  Categories       Categories?  @relation("CategoriesToCategories", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Categorie__paren__3A4CA8FD")
+  other_Categories Categories[] @relation("CategoriesToCategories")
+}
+
+model Coupons {
+  id         Int       @id(map: "PK__Coupons__3213E83F83ED3BD0") @default(autoincrement())
+  code       String?   @unique(map: "UQ__Coupons__357D4CF972178733") @db.VarChar(50)
+  discount   Decimal?  @db.Decimal(5, 2)
+  expired_at DateTime? @db.DateTime
+  Orders     Orders[]
+}
+
+model Districts {
+  id          Int         @id(map: "PK__District__3213E83F58C7D668") @default(autoincrement())
+  province_id Int
+  name        String      @db.NVarChar(100)
+  Addresses   Addresses[]
+  Provinces   Provinces   @relation(fields: [province_id], references: [id], onUpdate: NoAction, map: "FK__Districts__provi__2739D489")
+  Wards       Wards[]
+}
+
+model News {
+  id           Int          @id(map: "PK__News__3213E83FD68E4424") @default(autoincrement())
+  title        String       @db.NVarChar(200)
+  slug         String?      @unique(map: "UQ__News__32DD1E4C8B478340") @db.VarChar(250)
+  type         String?      @db.NVarChar(50)
+  thumbnail    String?      @db.VarChar(255)
+  content      String?      @db.NVarChar(Max)
+  is_published Boolean?     @default(true, map: "DF__News__is_publish__3E1D39E1")
+  created_at   DateTime?    @default(now(), map: "DF__News__created_at__3F115E1A") @db.DateTime
+  NewsImages   NewsImages[]
+}
+
+model NewsImages {
+  id         Int    @id(map: "PK__NewsImag__3213E83FB53D489A") @default(autoincrement())
+  news_id    Int
+  url        String @db.VarChar(255)
+  sort_order Int?   @default(0, map: "DF__NewsImage__sort___41EDCAC5")
+  News       News   @relation(fields: [news_id], references: [id], onUpdate: NoAction, map: "FK__NewsImage__news___42E1EEFE")
+}
+
+model OrderItems {
+  id       Int      @id(map: "PK__OrderIte__3213E83F757D2546") @default(autoincrement())
+  order_id Int?
+  book_id  Int?
+  quantity Int?
+  price    Decimal? @db.Decimal(12, 2)
+  Books    Books?   @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__OrderItem__book___6A30C649")
+  Orders   Orders?  @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__OrderItem__order__693CA210")
+}
+
+model Orders {
+  id         Int          @id(map: "PK__Orders__3213E83FC4A2FC9E") @default(autoincrement())
+  user_id    Int?
+  address_id Int?
+  total      Decimal?     @db.Decimal(12, 2)
+  status     String?      @db.NVarChar(50)
+  created_at DateTime?    @default(now(), map: "DF__Orders__created___6477ECF3") @db.DateTime
+  coupon_id  Int?
+  OrderItems OrderItems[]
+  Addresses  Addresses?   @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Orders__address___66603565")
+  Users      Users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Orders__user_id__656C112C")
+  Coupons    Coupons?     @relation(fields: [coupon_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Orders_Coupon")
+  Payments   Payments[]
+}
+
+model Payments {
+  id       Int       @id(map: "PK__Payments__3213E83FE00DD233") @default(autoincrement())
+  order_id Int?
+  method   String?   @db.NVarChar(50)
+  status   String?   @db.NVarChar(50)
+  paid_at  DateTime? @db.DateTime
+  Orders   Orders?   @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Payments__order___6D0D32F4")
+}
+
+model Provinces {
+  id        Int         @id(map: "PK__Province__3213E83FD9F00974") @default(autoincrement())
+  name      String      @db.NVarChar(100)
+  Addresses Addresses[]
+  Districts Districts[]
+}
+
+model Reviews {
+  id      Int     @id(map: "PK__Reviews__3213E83FC28AE824") @default(autoincrement())
+  user_id Int?
+  book_id Int?
+  rating  Int?
+  comment String? @db.NVarChar(500)
+  Books   Books?  @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reviews__book_id__73BA3083")
+  Users   Users?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reviews__user_id__72C60C4A")
+}
+
+model Roles {
+  id        Int         @id(map: "PK__Roles__3213E83FA8C1FD6F") @default(autoincrement())
+  name      String?     @unique(map: "UQ__Roles__72E12F1B55A262A5") @db.NVarChar(50)
+  UserRoles UserRoles[]
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B6149FE01E2") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model UserRoles {
+  user_id     Int
+  role_id     Int
+  assigned_at DateTime @default(now(), map: "DF__UserRoles__assig__2CBDA3B5") @db.DateTime
+  Roles       Roles    @relation(fields: [role_id], references: [id], onUpdate: NoAction, map: "FK__UserRoles__role___3F466844")
+  Users       Users    @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "FK__UserRoles__user___3E52440B")
+
+  @@id([user_id, role_id], map: "PK__UserRole__6EDEA1532DA79B7D")
+}
+
+model Users {
+  id         Int         @id(map: "PK__Users__3213E83F7B466E66") @default(autoincrement())
+  name       String?     @db.NVarChar(150)
+  email      String      @unique(map: "UQ__Users__AB6E616434993C09") @db.VarChar(150)
+  password   String?     @db.VarChar(255)
+  phone      String?     @db.NVarChar(50)
+  birth      DateTime?   @db.Date
+  is_google  Boolean?
+  created_at DateTime    @default(now(), map: "DF__Users__created_a__3B75D760") @db.DateTime
+  Addresses  Addresses[]
+  Carts      Carts?
+  Orders     Orders[]
+  Reviews    Reviews[]
+  UserRoles  UserRoles[]
+}
+
+model Wards {
+  id          Int         @id(map: "PK__Wards__3213E83FD364F749") @default(autoincrement())
+  district_id Int
+  name        String      @db.NVarChar(100)
+  Addresses   Addresses[]
+  Districts   Districts   @relation(fields: [district_id], references: [id], onUpdate: NoAction, map: "FK__Wards__district___2A164134")
+}
