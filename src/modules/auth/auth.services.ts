@@ -21,6 +21,7 @@ export const signUp = async (data: signUpInput) => {
 
 export const signIn = async (data: signInInput) => {
   const user = await authRepo.findUserByEmail(data.email);
+  console.log("Check user", user)
   if (!user) {
     throw new Error('USER_NOT_FOUND');
   }
@@ -48,7 +49,10 @@ export const signIn = async (data: signInInput) => {
     TokenHash: tokenHash,
     ExpiresAt: experis,
   });
-  return { user, accessToken, refreshToken };
+  const customer =
+    { id: user.id, name: user?.name, role_id: user?.UserRoles }
+
+  return { customer, accessToken, refreshToken };
 };
 
 export const forgotPassword = async (data: emailInput) => {
