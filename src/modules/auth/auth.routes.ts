@@ -1,12 +1,20 @@
-import * as authController from '#/modules/auth/auth.controllers.js'
+import authentication from '../../middlewares/auth/authentication';
+import refreshTokenMiddleware from '../../middlewares/auth/refreshTokenMiddleware';
+import * as authController from './auth.controllers';
 
+import express from 'express';
 
+const router = express.Router();
 
-import express from 'express'
-
-
-const router = express.Router()
-
-router.post('/', authController.SignUp);
+router.post('/sign-up', authController.signUp);
+router.post('/sign-in', authController.signIn);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/verify-passwowrd', authentication, authController.verifyPassword);
+router.post('/reset-password', authController.resetPassord);
+router.post(
+  '/refresh-token',
+  refreshTokenMiddleware,
+  authController.refreshToken,
+);
 
 export default router;

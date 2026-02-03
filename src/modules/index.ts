@@ -1,9 +1,7 @@
-import express from 'express'
-
+import authRoute from './auth/auth.routes';
+import express from 'express';
 const router = express.Router();
 
-import authRoute from '#/modules/auth/auth.routes.js'
-
-router.post('/auth', authRoute);
+router.use('/auth', authRoute);
 
 export default router;
