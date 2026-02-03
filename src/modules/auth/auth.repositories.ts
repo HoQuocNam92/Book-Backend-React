@@ -12,12 +12,8 @@ export const findUserByEmail = async (email: string) => {
       password: true,
       is_google: true,
       UserRoles: {
-        include: {
-          Roles: {
-            select: {
-              id: true,
-            },
-          },
+        select: {
+          role_id: true,
         },
       },
     },

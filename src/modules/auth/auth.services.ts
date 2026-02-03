@@ -21,7 +21,6 @@ export const signUp = async (data: signUpInput) => {
 
 export const signIn = async (data: signInInput) => {
   const user = await authRepo.findUserByEmail(data.email);
-  console.log("Check user", user)
   if (!user) {
     throw new Error('USER_NOT_FOUND');
   }
