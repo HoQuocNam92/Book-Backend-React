@@ -32,7 +32,7 @@ export const signIn = async (
 ) => {
   try {
     const data = signInSchema.parse(req.body);
-    const { user, accessToken, refreshToken } = await authService.signIn(data);
+    const { customer, accessToken, refreshToken } = await authService.signIn(data);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: 604800,
@@ -41,7 +41,7 @@ export const signIn = async (
     });
     res.status(200).json({
       message: 'Đăng nhập thành công',
-      data: { user, accessToken },
+      data: { customer, accessToken },
     });
   } catch (err) {
     next(err);

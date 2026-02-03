@@ -2,10 +2,15 @@ import prisma from '../../utils/prisma';
 import type { Prisma } from '@prisma/client';
 import { passwordInput } from './auth.schema';
 
-export const findUserByEmail = (email: string) => {
-  return prisma.users.findUnique({
+export const findUserByEmail = async (email: string) => {
+  return await prisma.users.findUnique({
     where: { email },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: true,
+      is_google: true,
       UserRoles: {
         include: {
           Roles: {
@@ -19,37 +24,46 @@ export const findUserByEmail = (email: string) => {
   });
 };
 
-export const createUser = (data: Prisma.UsersCreateInput) => {
-  return prisma.users.create({
-    data,
+export const createUser = async (data: Prisma.UsersCreateInput) => {
+  return await prisma.users.create({
+    data: {
+      ...data,
+      UserRoles: {
+        create: {
+          role_id: 2,
+        }
+      }
+    },
   });
+
+
 };
 
-export const addTokenToResetPassword = (
+export const addTokenToResetPassword = async (
   data: Prisma.ResetPasswordCreateInput,
 ) => {
-  return prisma.resetPassword.create({
+  return await prisma.resetPassword.create({
     data,
   });
 };
 
-export const getResetPassword = (user_id: number) => {
-  return prisma.resetPassword.findFirst({ where: { user_id: user_id } });
+export const getResetPassword = async (user_id: number) => {
+  return await prisma.resetPassword.findFirst({ where: { user_id: user_id } });
 };
-export const updateResetPassword = (user_id: number) => {
-  return prisma.resetPassword.updateMany({ where: { user_id }, data: { is_used: true } });
-};
-
-export const updatePassword = (id: number, password: passwordInput) => {
-  return prisma.users.update({ where: { id: id as number }, data: password });
+export const updateResetPassword = async (user_id: number) => {
+  return await prisma.resetPassword.updateMany({ where: { user_id }, data: { is_used: true } });
 };
 
-export const addRefreshTokens = (
+export const updatePassword = async (id: number, password: passwordInput) => {
+  return await prisma.users.update({ where: { id: id as number }, data: password });
+};
+
+export const addRefreshTokens = async (
   data: Prisma.RefreshTokensUncheckedCreateInput,
 ) => {
-  return prisma.refreshTokens.create({ data });
+  return await prisma.refreshTokens.create({ data });
 };
 
-export const getRefreshTokens = (id: number) => {
-  return prisma.refreshTokens.findFirst({ where: { Id: id } });
+export const getRefreshTokens = async (id: number) => {
+  return await prisma.refreshTokens.findFirst({ where: { Id: id } });
 };
