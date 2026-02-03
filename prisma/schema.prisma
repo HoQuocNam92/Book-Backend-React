@@ -1,9 +1,11 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "binary"
 }
 
 datasource db {
   provider = "sqlserver"
+  url      = env("DATABASE_URL")
 }
 
 model Addresses {
@@ -244,19 +246,21 @@ model UserRoles {
 }
 
 model Users {
-  id         Int         @id(map: "PK__Users__3213E83F7B466E66") @default(autoincrement())
-  name       String?     @db.NVarChar(150)
-  email      String      @unique(map: "UQ__Users__AB6E616434993C09") @db.VarChar(150)
-  password   String?     @db.VarChar(255)
-  phone      String?     @db.NVarChar(50)
-  birth      DateTime?   @db.Date
-  is_google  Boolean?
-  created_at DateTime    @default(now(), map: "DF__Users__created_a__3B75D760") @db.DateTime
-  Addresses  Addresses[]
-  Carts      Carts?
-  Orders     Orders[]
-  Reviews    Reviews[]
-  UserRoles  UserRoles[]
+  id            Int             @id(map: "PK__Users__3213E83F7B466E66") @default(autoincrement())
+  name          String?         @db.NVarChar(150)
+  email         String          @unique(map: "UQ__Users__AB6E616434993C09") @db.VarChar(150)
+  password      String?         @db.VarChar(255)
+  phone         String?         @db.NVarChar(50)
+  birth         DateTime?       @db.Date
+  is_google     Boolean?        @default(false, map: "DF_Users_is_google")
+  created_at    DateTime        @default(now(), map: "DF__Users__created_a__3B75D760") @db.DateTime
+  Addresses     Addresses[]
+  Carts         Carts?
+  Orders        Orders[]
+  RefreshTokens RefreshTokens[]
+  ResetPassword ResetPassword[]
+  Reviews       Reviews[]
+  UserRoles     UserRoles[]
 }
 
 model Wards {
@@ -265,4 +269,26 @@ model Wards {
   name        String      @db.NVarChar(100)
   Addresses   Addresses[]
   Districts   Districts   @relation(fields: [district_id], references: [id], onUpdate: NoAction, map: "FK__Wards__district___2A164134")
+}
+
+model ResetPassword {
+  id         Int       @id(map: "PK__Reset_Pa__3213E83F9A4E77CD") @default(autoincrement())
+  token      String?   @db.NVarChar(255)
+  is_used    Boolean?
+  user_id    Int?
+  expires_at DateTime? @db.DateTime
+  Users      Users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__ResetPass__user___55BFB948")
+}
+
+model RefreshTokens {
+  Id         Int       @id(map: "PK__RefreshT__3214EC07C795AC5A") @default(autoincrement())
+  UserId     Int
+  TokenHash  String    @db.NVarChar(255)
+  IsRevoked  Boolean   @default(false, map: "DF__RefreshTo__IsRev__67DE6983")
+  ExpiresAt  DateTime  @db.DateTime
+  CreatedAt  DateTime  @default(dbgenerated("sysdatetime()"), map: "DF__RefreshTo__Creat__68D28DBC") @db.DateTime
+  RevokedAt  DateTime? @db.DateTime
+  DeviceInfo String?   @db.NVarChar(255)
+  IpAddress  String?   @db.NVarChar(45)
+  Users      Users     @relation(fields: [UserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RefreshTokens_Users")
 }
