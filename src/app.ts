@@ -9,8 +9,8 @@ import { errorMiddleware } from './middlewares/errorMiddleware.js';
 dotenv.config();
 const app = express();
 const corsOptions = {
-    origin: 'http://localhost:5173',
-    credential: true
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
 };
 
 app.use(cors(corsOptions))

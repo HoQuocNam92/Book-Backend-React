@@ -51,7 +51,7 @@ export const signIn = async (data: signInInput) => {
   const customer =
     { id: user.id, name: user?.name, role_id: user?.UserRoles }
 
-  return { customer, accessToken, refreshToken };
+  return { user: customer, accessToken, refreshToken };
 };
 
 export const forgotPassword = async (data: emailInput) => {
