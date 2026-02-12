@@ -1,5 +1,4 @@
 openapi: 3.0.3
-
 info:
   title: AlphaBooks API
   version: 1.0.0
@@ -10,8 +9,14 @@ servers:
 tags:
   - name: Auth
     description: Authentication APIs
+  - name: Products
+    description: Product APIs
 
 paths:
+  # =========================
+  # AUTH
+  # =========================
+
   /auth/sign-up:
     post:
       tags: [Auth]
@@ -21,7 +26,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignUpRequest'
+              $ref: "#/components/schemas/SignUpRequest"
       responses:
         201:
           description: Đăng ký thành công
@@ -35,14 +40,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignInRequest'
+              $ref: "#/components/schemas/SignInRequest"
       responses:
         200:
           description: Đăng nhập thành công
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: "#/components/schemas/AuthResponse"
 
   /auth/refresh-token:
     post:
@@ -53,14 +58,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RefreshTokenRequest'
+              $ref: "#/components/schemas/RefreshTokenRequest"
       responses:
         200:
           description: Refresh token thành công
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccessTokenResponse'
+                $ref: "#/components/schemas/AccessTokenResponse"
 
   /auth/forgot-password:
     post:
@@ -71,7 +76,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForgotPasswordRequest'
+              $ref: "#/components/schemas/ForgotPasswordRequest"
       responses:
         200:
           description: Email đã được gửi
@@ -85,13 +90,123 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResetPasswordRequest'
+              $ref: "#/components/schemas/ResetPasswordRequest"
       responses:
         200:
           description: Reset mật khẩu thành công
 
+  # =========================
+  # PRODUCTS
+  # =========================
+
+  /products:
+    get:
+      tags: [Products]
+      summary: Lấy danh sách sản phẩm (phân trang + search)
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            example: 10
+        - in: query
+          name: search
+          schema:
+            type: string
+            example: "sapiens"
+      responses:
+        200:
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+
+    post:
+      tags: [Products]
+      summary: Tạo sản phẩm (multipart + upload images)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+      responses:
+        200:
+          description: Tạo sản phẩm thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+
+  /products/{id}:
+    get:
+      tags: [Products]
+      summary: Lấy chi tiết sản phẩm theo id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: "prod_001"
+      responses:
+        200:
+          description: Chi tiết sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+
+    put:
+      tags: [Products]
+      summary: Cập nhật sản phẩm (multipart)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: "prod_001"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UpdateProductRequest"
+      responses:
+        200:
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+
+    delete:
+      tags: [Products]
+      summary: Xóa sản phẩm
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: "prod_001"
+      responses:
+        200:
+          description: Xóa sản phẩm thành công
+
 components:
   schemas:
+    # =========================
+    # AUTH SCHEMAS
+    # =========================
+
     SignUpRequest:
       type: object
       required: [name, email, password]
@@ -104,7 +219,7 @@ components:
           example: nam@gmail.com
         password:
           type: string
-          example: 123456
+          example: "123456"
 
     SignInRequest:
       type: object
@@ -115,7 +230,7 @@ components:
           example: nam@gmail.com
         password:
           type: string
-          example: 123456
+          example: "123456"
 
     AuthResponse:
       type: object
@@ -152,6 +267,295 @@ components:
       properties:
         token:
           type: string
+          example: "reset_token_abc123"
         newPassword:
           type: string
-          example: 123456
+          example: "123456"
+
+    # =========================
+    # PRODUCT SCHEMAS
+    # =========================
+
+    ProductAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "attr_001"
+        key:
+          type: string
+          example: "Số trang"
+        value:
+          type: string
+          example: "550"
+
+    ProductPromotion:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "promo_001"
+        title:
+          type: string
+          example: "Freeship"
+        description:
+          type: string
+          example: "Miễn phí vận chuyển đơn từ 300k"
+
+    ProductImage:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "img_001"
+        url:
+          type: string
+          example: "https://res.cloudinary.com/...png"
+        publicId:
+          type: string
+          example: "Books/abcxyz"
+
+    # =========================
+    # REQUEST: CREATE PRODUCT
+    # multipart/form-data
+    # =========================
+
+    CreateProductRequest:
+      type: object
+      required: [title, price]
+      properties:
+        title:
+          type: string
+          example: "Sapiens: Lược sử loài người"
+
+        slug:
+          type: string
+          example: "sapiens-luoc-su-loai-nguoi"
+
+        price:
+          type: number
+          example: 120000
+
+        discount_percent:
+          type: number
+          example: 10
+          description: "Giảm giá theo % (0 - 100)"
+
+        stock:
+          type: integer
+          example: 50
+
+        description:
+          type: string
+          example: "Cuốn sách cực hay về lịch sử tiến hóa của loài người..."
+
+        categoryId:
+          type: string
+          example: "cate_001"
+
+        author:
+          type: string
+          example: "Yuval Noah Harari"
+
+        publisher:
+          type: string
+          example: "NXB Tri Thức"
+
+        publishYear:
+          type: integer
+          example: 2014
+
+        # vì multipart/form-data không nhập array object ngon trong swagger
+        # nên ta dùng JSON string
+        attributes_json:
+          type: string
+          example: |
+            [
+              { "key": "Số trang", "value": "550" },
+              { "key": "Kích thước", "value": "14x20cm" }
+            ]
+          description: "JSON string: danh sách attributes"
+
+        promotions_json:
+          type: string
+          example: |
+            [
+              { "title": "Freeship", "description": "Miễn phí vận chuyển đơn từ 300k" },
+              { "title": "Tặng bookmark", "description": "Tặng kèm bookmark xịn" }
+            ]
+          description: "JSON string: danh sách promotions"
+
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: "Upload nhiều ảnh (multer.array('images'))"
+
+    # =========================
+    # REQUEST: UPDATE PRODUCT
+    # multipart/form-data
+    # =========================
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Sapiens (Bản mới)"
+
+        slug:
+          type: string
+          example: "sapiens-ban-moi"
+
+        price:
+          type: number
+          example: 150000
+
+        discount_percent:
+          type: number
+          example: 30
+
+        stock:
+          type: integer
+          example: 40
+
+        description:
+          type: string
+          example: "Mô tả cập nhật..."
+
+        categoryId:
+          type: string
+          example: "cate_001"
+
+        author:
+          type: string
+          example: "Yuval Noah Harari"
+
+        publisher:
+          type: string
+          example: "NXB Tri Thức"
+
+        publishYear:
+          type: integer
+          example: 2014
+
+        attributes_json:
+          type: string
+          example: |
+            [
+              { "key": "Số trang", "value": "600" },
+              { "key": "Bìa", "value": "Cứng" }
+            ]
+
+        promotions_json:
+          type: string
+          example: |
+            [
+              { "title": "Giảm thêm 5%", "description": "Khi mua 2 cuốn trở lên" }
+            ]
+
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: "Upload thêm ảnh mới"
+
+    # =========================
+    # RESPONSE
+    # =========================
+
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "prod_001"
+
+        title:
+          type: string
+          example: "Sapiens: Lược sử loài người"
+
+        slug:
+          type: string
+          example: "sapiens-luoc-su-loai-nguoi"
+
+        price:
+          type: number
+          example: 120000
+
+        discount_percent:
+          type: number
+          example: 10
+
+        finalPrice:
+          type: number
+          example: 108000
+          description: "Giá sau giảm"
+
+        stock:
+          type: integer
+          example: 50
+
+        description:
+          type: string
+          example: "Cuốn sách cực hay..."
+
+        categoryId:
+          type: string
+          example: "cate_001"
+
+        author:
+          type: string
+          example: "Yuval Noah Harari"
+
+        publisher:
+          type: string
+          example: "NXB Tri Thức"
+
+        publishYear:
+          type: integer
+          example: 2014
+
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductAttribute"
+
+        promotions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductPromotion"
+
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductImage"
+
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-02-11T10:30:00Z"
+
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-02-11T10:30:00Z"
+
+    ProductListResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 100
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductResponse"

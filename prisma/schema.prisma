@@ -45,30 +45,30 @@ model BookAttributes {
   book_id    Int
   attr_key   String @db.NVarChar(100)
   attr_value String @db.NVarChar(255)
-  Books      Books  @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK_BookAttributes_Books")
+  Books      Books  @relation(fields: [book_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_BookAttributes_Books")
 }
 
 model BookAuthors {
   book_id   Int
   author_id Int
   Authors   Authors @relation(fields: [author_id], references: [id], onUpdate: NoAction, map: "FK__BookAutho__autho__571DF1D5")
-  Books     Books   @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK__BookAutho__book___5629CD9C")
+  Books     Books   @relation(fields: [book_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__BookAutho__book___5629CD9C")
 
   @@id([book_id, author_id], map: "PK__BookAuth__A1680C5D3C1C8574")
 }
 
 model BookImages {
-  id      Int     @id(map: "PK__BookImag__3213E83FFAD37F57") @default(autoincrement())
-  book_id Int?
-  url     String? @db.VarChar(255)
-  Books   Books?  @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__BookImage__book___59FA5E80")
+  id      Int    @id(map: "PK__BookImag__3213E83FFAD37F57") @default(autoincrement())
+  book_id Int
+  url     String @db.VarChar(255)
+  Books   Books  @relation(fields: [book_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__BookImage__book___59FA5E80")
 }
 
 model BookPromotions {
   id      Int    @id(map: "PK__BookProm__3213E83F55704361") @default(autoincrement())
   book_id Int
   content String @db.NVarChar(500)
-  Books   Books  @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK__BookPromo__book___15DA3E5D")
+  Books   Books  @relation(fields: [book_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__BookPromo__book___15DA3E5D")
 }
 
 model Books {
@@ -82,6 +82,7 @@ model Books {
   brand_id         Int?
   category_id      Int?
   discount_percent Int?             @default(0, map: "DF__Books__discount___2EDAF651")
+  status           String           @default("active", map: "DF__Books__status__7908F585") @db.VarChar(20)
   created_at       DateTime?        @default(now(), map: "DF__Books__created_a__5165187F") @db.DateTime
   BookAttributes   BookAttributes[]
   BookAuthors      BookAuthors[]

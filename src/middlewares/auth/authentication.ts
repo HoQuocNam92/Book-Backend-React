@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import 'dotenv';
-import { IverifyToken } from '../../types/IverifyToken';
-import type { AuthRequest } from '../../types/IAuthRequest';
+import { IverifyToken } from '../../interfaces/IverifyToken';
+import type { AuthRequest } from '../../interfaces/IAuthRequest';
 
 const authentication = (
   req: AuthRequest,

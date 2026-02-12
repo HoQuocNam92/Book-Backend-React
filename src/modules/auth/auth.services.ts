@@ -9,7 +9,7 @@ import {
 } from './auth.schema.js';
 import { generateToken } from '../../utils/token.js';
 import sendMail from '../../utils/sendMail.js';
-import { IverifyToken } from '../../types/IverifyToken.js';
+import { IverifyToken } from '../../interfaces/IverifyToken.js';
 export const signUp = async (data: signUpInput) => {
   const user = await authRepo.findUserByEmail(data.email);
   if (user) {
