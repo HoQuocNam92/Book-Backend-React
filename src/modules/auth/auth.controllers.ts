@@ -6,7 +6,7 @@ import {
   emailSchema,
   passwordSchema,
 } from './auth.schema.js';
-import type { AuthRequest } from '../../types/IAuthRequest.js';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
 
 export const signUp = async (
   req: Request,

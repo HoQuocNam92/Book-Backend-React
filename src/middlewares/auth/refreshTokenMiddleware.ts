@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { AuthRequest } from '../../types/IAuthRequest';
+import { AuthRequest } from '../../interfaces/IAuthRequest';
 import * as authRepo from '../../modules/auth/auth.repositories.js';
 import bcrypt from 'bcrypt';
 export const refreshTokenMiddleware = async (
