@@ -10,6 +10,8 @@ import {
 import { generateToken } from '../../utils/token.js';
 import sendMail from '../../utils/sendMail.js';
 import { IverifyToken } from '../../interfaces/IverifyToken.js';
+import axios from 'axios';
+import { oAuth2Client } from './logic/oAuth2Client.js';
 export const signUp = async (data: signUpInput) => {
   const user = await authRepo.findUserByEmail(data.email);
   if (user) {
@@ -115,3 +117,20 @@ export const refreshToken = async (data: IverifyToken) => {
 
   return { accessToken, refreshToken };
 };
+
+
+export const signInWithGoogle = async (code: string) => {
+  const { tokens } = await oAuth2Client.getToken(code);
+  const userRes = await axios.get(
+    "https://www.googleapis.com/oauth2/v2/userinfo",
+    {
+      headers: {
+        Authorization: `Bearer ${tokens.access_token}`,
+      },
+    }
+  );
+  const { name, picture, email } = userRes.data;
+  return authRepo.createUser({ name, email }, 1, picture);
+
+  // console.log("Check data", data)
+}

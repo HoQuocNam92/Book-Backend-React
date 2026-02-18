@@ -210,6 +210,28 @@ model Provinces {
   Districts Districts[]
 }
 
+model RefreshTokens {
+  Id         Int       @id(map: "PK__RefreshT__3214EC07C795AC5A") @default(autoincrement())
+  UserId     Int
+  TokenHash  String    @db.NVarChar(255)
+  IsRevoked  Boolean   @default(false, map: "DF__RefreshTo__IsRev__67DE6983")
+  ExpiresAt  DateTime  @db.DateTime
+  CreatedAt  DateTime  @default(dbgenerated("sysdatetime()"), map: "DF__RefreshTo__Creat__68D28DBC") @db.DateTime
+  RevokedAt  DateTime? @db.DateTime
+  DeviceInfo String?   @db.NVarChar(255)
+  IpAddress  String?   @db.NVarChar(45)
+  Users      Users     @relation(fields: [UserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RefreshTokens_Users")
+}
+
+model ResetPassword {
+  id         Int       @id(map: "PK__Reset_Pa__3213E83F9A4E77CD") @default(autoincrement())
+  token      String?   @db.NVarChar(255)
+  is_used    Boolean?
+  user_id    Int?
+  expires_at DateTime? @db.DateTime
+  Users      Users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__ResetPass__user___55BFB948")
+}
+
 model Reviews {
   id      Int     @id(map: "PK__Reviews__3213E83FC28AE824") @default(autoincrement())
   user_id Int?
@@ -236,12 +258,21 @@ model sysdiagrams {
   @@unique([principal_id, name], map: "UK_principal_name")
 }
 
+model UserProfile {
+  User_id Int       @id(map: "PK_UserProfile")
+  Gender  String?   @db.NVarChar(50)
+  Phone   String?   @db.NVarChar(14)
+  Birth   DateTime? @db.Date
+  avatar  String?   @db.NVarChar(255)
+  Users   Users     @relation(fields: [User_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__Users_Pro__User___3335971A")
+}
+
 model UserRoles {
   user_id     Int
   role_id     Int
   assigned_at DateTime @default(now(), map: "DF__UserRoles__assig__2CBDA3B5") @db.DateTime
   Roles       Roles    @relation(fields: [role_id], references: [id], onUpdate: NoAction, map: "FK__UserRoles__role___3F466844")
-  Users       Users    @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "FK__UserRoles__user___3E52440B")
+  Users       Users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__UserRoles__user___3E52440B")
 
   @@id([user_id, role_id], map: "PK__UserRole__6EDEA1532DA79B7D")
 }
@@ -251,8 +282,6 @@ model Users {
   name          String?         @db.NVarChar(150)
   email         String          @unique(map: "UQ__Users__AB6E616434993C09") @db.VarChar(150)
   password      String?         @db.VarChar(255)
-  phone         String?         @db.NVarChar(50)
-  birth         DateTime?       @db.Date
   is_google     Boolean?        @default(false, map: "DF_Users_is_google")
   created_at    DateTime        @default(now(), map: "DF__Users__created_a__3B75D760") @db.DateTime
   Addresses     Addresses[]
@@ -261,6 +290,7 @@ model Users {
   RefreshTokens RefreshTokens[]
   ResetPassword ResetPassword[]
   Reviews       Reviews[]
+  UserProfile   UserProfile?
   UserRoles     UserRoles[]
 }
 
@@ -270,26 +300,4 @@ model Wards {
   name        String      @db.NVarChar(100)
   Addresses   Addresses[]
   Districts   Districts   @relation(fields: [district_id], references: [id], onUpdate: NoAction, map: "FK__Wards__district___2A164134")
-}
-
-model ResetPassword {
-  id         Int       @id(map: "PK__Reset_Pa__3213E83F9A4E77CD") @default(autoincrement())
-  token      String?   @db.NVarChar(255)
-  is_used    Boolean?
-  user_id    Int?
-  expires_at DateTime? @db.DateTime
-  Users      Users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__ResetPass__user___55BFB948")
-}
-
-model RefreshTokens {
-  Id         Int       @id(map: "PK__RefreshT__3214EC07C795AC5A") @default(autoincrement())
-  UserId     Int
-  TokenHash  String    @db.NVarChar(255)
-  IsRevoked  Boolean   @default(false, map: "DF__RefreshTo__IsRev__67DE6983")
-  ExpiresAt  DateTime  @db.DateTime
-  CreatedAt  DateTime  @default(dbgenerated("sysdatetime()"), map: "DF__RefreshTo__Creat__68D28DBC") @db.DateTime
-  RevokedAt  DateTime? @db.DateTime
-  DeviceInfo String?   @db.NVarChar(255)
-  IpAddress  String?   @db.NVarChar(45)
-  Users      Users     @relation(fields: [UserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RefreshTokens_Users")
 }

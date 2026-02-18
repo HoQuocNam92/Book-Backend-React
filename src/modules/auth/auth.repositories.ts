@@ -20,18 +20,25 @@ export const findUserByEmail = async (email: string) => {
   });
 };
 
-export const createUser = async (data: Prisma.UsersCreateInput) => {
+export const createUser = async (data: Prisma.UsersCreateInput, is_google = 0, avatar = null) => {
   return await prisma.users.create({
     data: {
+      is_google: !!is_google,
       ...data,
+
       UserRoles: {
         create: {
           role_id: 2,
         }
+      },
+      UserProfile: {
+        create: {
+          avatar: avatar
+        }
       }
+
     },
   });
-
 
 };
 

@@ -6,7 +6,12 @@ import {
   emailSchema,
   passwordSchema,
 } from './auth.schema.js';
+<<<<<<< Updated upstream
 import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+=======
+import type { AuthRequest } from '../../types/IAuthRequest.js';
+import { oAuth2Client } from './logic/oAuth2Client.js';
+>>>>>>> Stashed changes
 
 export const signUp = async (
   req: Request,
@@ -47,6 +52,40 @@ export const signIn = async (
     next(err);
   }
 };
+
+export const googleCallback = async (req: Request,
+  res: Response,
+  next: NextFunction,) => {
+  try {
+    const url = oAuth2Client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      scope: ["openid", "email", "profile"]
+    })
+    res.redirect(url);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const signInWithGoogle = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const code = req.query.code;
+    if (!code) return res.status(400).send("Missing code");
+    const user = await authService.signInWithGoogle(code as string);
+    res.status(200).json({
+      message: 'Link khôi phục mật khẩu đã gữi thành công',
+      data: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const forgotPassword = async (
   req: Request,
   res: Response,
