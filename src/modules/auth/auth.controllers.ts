@@ -6,12 +6,8 @@ import {
   emailSchema,
   passwordSchema,
 } from './auth.schema.js';
-<<<<<<< Updated upstream
 import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
-=======
-import type { AuthRequest } from '../../types/IAuthRequest.js';
 import { oAuth2Client } from './logic/oAuth2Client.js';
->>>>>>> Stashed changes
 
 export const signUp = async (
   req: Request,
@@ -37,16 +33,21 @@ export const signIn = async (
 ) => {
   try {
     const data = signInSchema.parse(req.body);
-    const { user, accessToken, refreshToken } = await authService.signIn(data);
+    const { accessToken, refreshToken } = await authService.signIn(data);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: 604800,
       sameSite: 'strict',
-      secure: true,
+      secure: false,
+    });
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: 3600,
+      sameSite: 'strict',
+      secure: false,
     });
     res.status(200).json({
       message: 'Đăng nhập thành công',
-      data: { user, accessToken },
     });
   } catch (err) {
     next(err);
@@ -62,7 +63,7 @@ export const googleCallback = async (req: Request,
       prompt: 'consent',
       scope: ["openid", "email", "profile"]
     })
-    res.redirect(url);
+    return res.redirect(url);
   } catch (err) {
     next(err);
   }
@@ -76,11 +77,20 @@ export const signInWithGoogle = async (
   try {
     const code = req.query.code;
     if (!code) return res.status(400).send("Missing code");
-    const user = await authService.signInWithGoogle(code as string);
-    res.status(200).json({
-      message: 'Link khôi phục mật khẩu đã gữi thành công',
-      data: user,
+    const { accessToken, refreshToken }: any = await authService.signInWithGoogle(code as string);
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 604800,
+      sameSite: 'strict',
+      secure: false,
     });
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: 3600,
+      sameSite: 'strict',
+      secure: false,
+    });
+    return res.redirect("http://localhost:5173/");
   } catch (err) {
     next(err);
   }
@@ -94,7 +104,7 @@ export const forgotPassword = async (
   try {
     const data = emailSchema.parse(req.body);
     const user = await authService.forgotPassword(data);
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Link khôi phục mật khẩu đã gữi thành công',
       data: user,
     });
@@ -117,11 +127,16 @@ export const refreshToken = async (
       httpOnly: true,
       maxAge: 604800,
       sameSite: 'strict',
-      secure: true,
+      secure: false,
     });
-    res.status(200).json({
-      message: 'Reset token thành công',
-      data: { accessToken },
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: 3600,
+      sameSite: 'strict',
+      secure: false,
+    });
+    return res.status(200).json({
+      message: 'Làm mới token thành công',
     });
   } catch (err) {
     next(err);
@@ -135,7 +150,7 @@ export const verifyPassword = async (
 ) => {
   try {
     await authService.verifyPassword(req.user?.id!);
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Xác thực link khôi phục mật khẩu thành công',
     });
   } catch (error) {
@@ -152,10 +167,26 @@ export const resetPassord = async (
     const { password } = req.body;
     const data = passwordSchema.parse(password);
     await authService.resetPassord(req.user?.id!, { password: data.password });
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Khôi phục mật khẩu thành công',
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const signOut = async (
+  req: AuthRequest,
+  res: Response) => {
+  try {
+    await authService.signOut(req.user?.id!);
+    res.clearCookie('refreshToken');
+    return res.status(200).json({
+      message: 'Đăng xuất thành công',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Đăng xuất thất bại',
+    });
   }
 };

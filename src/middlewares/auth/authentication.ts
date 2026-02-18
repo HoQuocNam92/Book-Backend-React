@@ -9,7 +9,7 @@ const authentication = (
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.headers['authorization']?.split(' ')[1];
+  const token = req.cookies?.accessToken;
   try {
     if (!token) {
       throw new Error('UNAUTHORIZED');

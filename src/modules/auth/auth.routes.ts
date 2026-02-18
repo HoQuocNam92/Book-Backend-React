@@ -19,4 +19,5 @@ router.post(
   authController.refreshToken,
 );
 
+router.post('/sign-out', authentication, authController.signOut);
 export default router;

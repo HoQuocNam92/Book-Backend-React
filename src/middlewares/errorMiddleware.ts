@@ -26,7 +26,7 @@ export const errorMiddleware = (
   }
 
   switch (err.message) {
-    case 'EMAIL_EXISTS':
+    case 'EMAIL_ALREADY_EXISTS':
       return res.status(409).json({
         message: 'Email đã tồn tại',
       });
@@ -90,8 +90,10 @@ export const errorMiddleware = (
       return res.status(401).json({
         message: 'Không tìm thấy image',
       });
-
-
+    case 'GOOGLE_ACCOUNT_CANNOT_SIGN_IN_WITH_PASSWORD':
+      return res.status(400).json({
+        message: 'Tài khoản đăng nhập bằng Google không thể đăng nhập bằng mật khẩu',
+      });
     default:
       console.error('Unhandled error:', err);
       return res.status(500).json({

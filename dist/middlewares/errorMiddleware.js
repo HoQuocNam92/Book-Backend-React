@@ -10,7 +10,7 @@ export const errorMiddleware = (err, req, res, next) => {
     );
     return res.status(400).json({ message: "Invalid data" });
   }
-  if (err.message === "EMAIL_EXISTS") {
+  if (err.message === "EMAIL_ALREADY_EXISTS") {
     console.error("BusinessError:", err.message);
     return res.status(409).json({ message: "Email already exists" });
   }

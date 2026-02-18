@@ -94,6 +94,7 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
     const pageSize = 30
     const skip = (pageNumber - 1) * pageSize;
 
+    console.log("Check category_slug", category_slug)
 
     const findFirstCategory = await prisma.categories.findFirst({
         select: { slug: true },
@@ -102,7 +103,7 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
 
     const slug = category_slug || findFirstCategory?.slug;
 
-
+    console.log("Check slug", slug)
     const parentCategory = await prisma.categories.findFirst({
         where: { slug },
         select: { id: true },
@@ -151,7 +152,7 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
 
 
     const totalPages = Math.ceil(totalItems / pageSize);
-
+    console.log("Check products", products[0])
     return {
         data: products.map((p: any) => ({
             ...p,

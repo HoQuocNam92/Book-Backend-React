@@ -15,7 +15,7 @@ import { oAuth2Client } from './logic/oAuth2Client.js';
 export const signUp = async (data: signUpInput) => {
   const user = await authRepo.findUserByEmail(data.email);
   if (user) {
-    throw new Error('EMAIL_EXISTS');
+    throw new Error('EMAIL_ALREADY_EXISTS');
   }
   const hashPassword = await bcrypt.hash(data.password, 10);
   return authRepo.createUser({ ...data, password: hashPassword });
@@ -25,6 +25,9 @@ export const signIn = async (data: signInInput) => {
   const user = await authRepo.findUserByEmail(data.email);
   if (!user) {
     throw new Error('USER_NOT_FOUND');
+  }
+  if (user.is_google) {
+    throw new Error('GOOGLE_ACCOUNT_CANNOT_SIGN_IN_WITH_PASSWORD');
   }
   const verifyPassword = await bcrypt.compare(data.password!, user.password!);
 
@@ -114,7 +117,13 @@ export const refreshToken = async (data: IverifyToken) => {
     secret: process.env.REFRESHTOKEN!,
     exp: '7d',
   });
-
+  const tokenHash = await bcrypt.hash(refreshToken, 10);
+  const experis = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  await authRepo.addRefreshTokens({
+    UserId: data.id,
+    TokenHash: tokenHash,
+    ExpiresAt: experis,
+  });
   return { accessToken, refreshToken };
 };
 
@@ -130,7 +139,32 @@ export const signInWithGoogle = async (code: string) => {
     }
   );
   const { name, picture, email } = userRes.data;
-  return authRepo.createUser({ name, email }, 1, picture);
+  const existingUser = await authRepo.findUserByEmail(email);
+  if (existingUser) {
+    if (!existingUser.is_google) {
+      throw new Error('EMAIL_ALREADY_EXISTS');
+    }
+    return existingUser;
+  }
+  await authRepo.createUser({ name, email }, 1, picture);
+  const user = await authRepo.findUserByEmail(email);
+  const accessToken = generateToken({
+    id: user?.id!,
+    role_id: user?.UserRoles.map((x) => x.role_id)!,
+    secret: process.env.ACCESSTOKEN!,
+    exp: '1h',
+  });
+  const refreshToken = generateToken({
+    id: user?.id!,
+    role_id: user?.UserRoles.map((x) => x.role_id)!,
+    secret: process.env.REFRESHTOKEN!,
+    exp: '7d',
+  });
+  return { user, accessToken, refreshToken };
 
-  // console.log("Check data", data)
+}
+
+
+export const signOut = async (user_id: number) => {
+  return await authRepo.deleteRefreshTokens(user_id);
 }

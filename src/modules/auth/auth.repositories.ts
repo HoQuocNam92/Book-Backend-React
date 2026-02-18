@@ -70,3 +70,7 @@ export const addRefreshTokens = async (
 export const getRefreshTokens = async (id: number) => {
   return await prisma.refreshTokens.findFirst({ where: { Id: id } });
 };
+
+export const deleteRefreshTokens = async (user_id: number) => {
+  return await prisma.refreshTokens.deleteMany({ where: { UserId: user_id } });
+};
