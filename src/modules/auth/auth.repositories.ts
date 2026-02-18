@@ -20,18 +20,25 @@ export const findUserByEmail = async (email: string) => {
   });
 };
 
-export const createUser = async (data: Prisma.UsersCreateInput) => {
+export const createUser = async (data: Prisma.UsersCreateInput, is_google = 0, avatar = null) => {
   return await prisma.users.create({
     data: {
+      is_google: !!is_google,
       ...data,
+
       UserRoles: {
         create: {
           role_id: 2,
         }
+      },
+      UserProfile: {
+        create: {
+          avatar: avatar
+        }
       }
+
     },
   });
-
 
 };
 
@@ -62,4 +69,8 @@ export const addRefreshTokens = async (
 
 export const getRefreshTokens = async (id: number) => {
   return await prisma.refreshTokens.findFirst({ where: { Id: id } });
+};
+
+export const deleteRefreshTokens = async (user_id: number) => {
+  return await prisma.refreshTokens.deleteMany({ where: { UserId: user_id } });
 };

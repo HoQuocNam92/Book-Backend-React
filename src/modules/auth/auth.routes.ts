@@ -1,10 +1,12 @@
 import authentication from '../../middlewares/auth/authentication';
 import refreshTokenMiddleware from '../../middlewares/auth/refreshTokenMiddleware';
 import * as authController from './auth.controllers';
-
 import express from 'express';
 
 const router = express.Router();
+
+router.get('/google', authController.googleCallback)
+router.get('/google/callback', authController.signInWithGoogle)
 
 router.post('/sign-up', authController.signUp);
 router.post('/sign-in', authController.signIn);
@@ -17,4 +19,5 @@ router.post(
   authController.refreshToken,
 );
 
+router.post('/sign-out', authentication, authController.signOut);
 export default router;
