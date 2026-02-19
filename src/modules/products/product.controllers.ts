@@ -5,14 +5,12 @@ import { NextFunction, Request, Response } from 'express'
 import * as productService from './product.services'
 import { deleteProductSchema, productSchema } from './product.schema';
 
-import cloudinary from '../../utils/cloudinary'
 
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const pageNumber = Number(req.query?.page) || 1;
-        console.log("Hello")
-        const data = await productService.getProducts(pageNumber);
+
+        const data = await productService.getHomeProducts();
         return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công", data });
     } catch (error) {
         next(error)
