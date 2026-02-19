@@ -28,7 +28,7 @@ export const deleteProduct = async (id: deleteProductInput) => {
     const data = await productRepo.getProductImageById(Number(id.id));
 
     for (let i = 0; i < data.length; i++) {
-        const url_cloudinary = "Books/" + data[i].url?.split('/upload/')[1].split('/')[2].split('.')[0];
+        const url_cloudinary = "Books-brand-logos/" + data[i].url?.split('/upload/')[1].split('/')[2].split('.')[0];
         await cloudinary.uploader.destroy(url_cloudinary)
     }
     return await productRepo.deleteProduct(id)
