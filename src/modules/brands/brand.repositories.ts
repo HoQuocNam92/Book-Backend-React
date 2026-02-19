@@ -94,3 +94,9 @@ export const deleteBrand = async (id: number) => {
 
 }
 
+export const getBrandById = async (id: number) => {
+    return await prisma.brands.findUnique({
+        where: { id }
+    })
+
+}
