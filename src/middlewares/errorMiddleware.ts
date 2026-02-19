@@ -94,6 +94,10 @@ export const errorMiddleware = (
       return res.status(400).json({
         message: 'Tài khoản đăng nhập bằng Google không thể đăng nhập bằng mật khẩu',
       });
+    case 'NOT_FOUND_BRAND':
+      return res.status(404).json({
+        message: 'Không tìm thấy thương hiệu',
+      });
     default:
       console.error('Unhandled error:', err);
       return res.status(500).json({
