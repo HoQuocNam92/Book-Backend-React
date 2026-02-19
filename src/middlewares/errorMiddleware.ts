@@ -98,6 +98,10 @@ export const errorMiddleware = (
       return res.status(404).json({
         message: 'Không tìm thấy thương hiệu',
       });
+    case 'NOT_FOUND_CATEGORY':
+      return res.status(404).json({
+        message: 'Không tìm thấy danh mục',
+      });
     default:
       console.error('Unhandled error:', err);
       return res.status(500).json({
