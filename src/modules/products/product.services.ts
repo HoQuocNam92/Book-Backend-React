@@ -4,7 +4,7 @@ import { deleteProductInput, productInput } from './product.schema';
 
 import cloudinary from '../../utils/cloudinary'
 
-export const getProducts = async (pageNumber: number) => "";
+export const getHomeProducts = async () => await productRepo.getHomeProducts();
 export const getProductByCategory = async (category_slug: string, pageNumber: number) => await productRepo.getProductByCategory(category_slug, pageNumber);
 
 

@@ -3,98 +3,97 @@ import { deleteProductInput, productInput } from "./product.schema";
 
 import cloudinary from '../../utils/cloudinary'
 
-// export const getProducts = async (pageNumber: number) => {
-//     const pageSize = 30
+export const getHomeProducts = async () => {
+    const take = 12;
 
-//     const skip = (pageNumber - 1) * pageSize;
+    const newBooksPromise = prisma.books.findMany({
+        take,
+        orderBy: { created_at: "desc" },
+        include: {
+            BookImages: {
+                take: 1,
+                select: { url: true },
+            }
+        },
+    });
 
-//     let findFirstCategory = await prisma.categories.findMany({
-//         take: 5,
-//         select: { slug: true },
-//         where: { parent_id: null },
-//     });
+    const discountBooksPromise = prisma.books.findMany({
+        take,
+        where: {
+            discount_percent: { gt: 0 },
+        },
+        orderBy: { discount_percent: "desc" },
+        include: {
+            BookImages: {
+                take: 1,
+                select: { url: true },
+            }
+        },
+    });
 
+    const bestSellerPromise = prisma.orderItems.groupBy({
+        by: ["book_id"],
+        _sum: { quantity: true },
+        orderBy: {
+            _sum: { quantity: "desc" },
+        },
+        take,
+    });
 
+    const [newBooks, discountBooks, bestSellerRaw] = await Promise.all([
+        newBooksPromise,
+        discountBooksPromise,
+        bestSellerPromise,
+    ]);
 
-
-//     const parentCategory = await prisma.categories.findMany({
-//         where: {
-//             slug: {
-//                 in: findFirstCategory.map(x => x.slug) as string[]
-//             }
-//         },
-//         select: { id: true },
-//     });
-//     const whereConditions = {
-//         category_id: {
-//             in: (
-//                 await prisma.categories.findMany({
-//                     where: { parent_id: parentCategory?.id },
-//                     select: { id: true },
-//                 })
-//             ).map((c) => c.id),
-//         },
-//     };
-//     const totalItems = await prisma.books.count({
-//         where: whereConditions
-//     });
-//     const products = await prisma.books.findMany({
-
-//         skip,
-//         take: pageSize,
-//         orderBy: { id: "desc" },
-//         select: {
-//             id: true,
-//             title: true,
-//             sale_price: true,
-//             price: true,
-//             slug: true,
-//             discount_percent: true,
-//             BookImages: {
-//                 take: 1,
-//                 select: { url: true },
-//             },
-//             Categories: {
-//                 select: {
-//                     name: true,
-//                     slug: true,
-//                 },
-
-//             }
-//         },
-//         where: whereConditions,
-//     });
+    const bestSellerIds = bestSellerRaw
+        .map((x) => x.book_id)
+        .filter((id): id is number => id !== null);
 
 
-//     const totalPages = Math.ceil(totalItems / pageSize);
+    let bestSellerBooks: any[] = [];
 
-//     return {
-//         data: products.map((p) => ({
-//             ...p,
-//             BookImages: p.BookImages[0]?.url || null,
-//             price: Number(p.price),
-//             sale_price: Number(p.sale_price),
-//             discount_percent: Number(p.discount_percent),
-//         })),
-//         pagination: {
-//             page: pageNumber,
-//             pageSize,
-//             totalItems,
-//             totalPages,
-//         },
-//         category: {
-//             name: products[0].Categories?.name,
-//             slug: products[0].Categories?.slug,
-//         }
+    if (bestSellerIds.length > 0) {
+        const books = await prisma.books.findMany({
+            where: { id: { in: bestSellerIds } },
+            include: {
+                BookImages: {
+                    take: 1,
+                    select: { url: true },
+                }
+            },
+        });
 
-//     };
-// }
+        const map = new Map(
+            bestSellerRaw.map((x) => [x.book_id, x._sum.quantity])
+        );
+
+        bestSellerBooks = books.sort(
+            (a, b) => (map.get(b.id) ?? 0) - (map.get(a.id) ?? 0)
+        );
+    }
+
+    const formatBook = (p: any) => ({
+        ...p,
+        BookImages: p.BookImages.url,
+        price: Number(p.price),
+        sale_price: Number(p.sale_price),
+        discount_percent: Number(p.discount_percent),
+    });
+
+    return {
+        newBooks: newBooks.map(formatBook),
+        bestSellerBooks: bestSellerBooks.map(formatBook),
+        discountBooks: discountBooks.map(formatBook),
+    };
+};
+
+
 
 export const getProductByCategory = async (category_slug: string | undefined, pageNumber: number,) => {
     const pageSize = 30
     const skip = (pageNumber - 1) * pageSize;
 
-    console.log("Check category_slug", category_slug)
 
     const findFirstCategory = await prisma.categories.findFirst({
         select: { slug: true },
@@ -103,7 +102,6 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
 
     const slug = category_slug || findFirstCategory?.slug;
 
-    console.log("Check slug", slug)
     const parentCategory = await prisma.categories.findFirst({
         where: { slug },
         select: { id: true },
@@ -152,7 +150,6 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
 
 
     const totalPages = Math.ceil(totalItems / pageSize);
-    console.log("Check products", products[0])
     return {
         data: products.map((p: any) => ({
             ...p,
