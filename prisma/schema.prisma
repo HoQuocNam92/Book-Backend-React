@@ -73,23 +73,25 @@ model BookPromotions {
 
 model Books {
   id               Int              @id(map: "PK__Books__3213E83F9506B05C") @default(autoincrement())
-  title            String?          @db.NVarChar(200)
+  title            String           @db.NVarChar(200)
   sale_price       Decimal?         @db.Decimal(12, 2)
-  price            Decimal?         @db.Decimal(12, 2)
-  stock            Int?
-  description      String?          @db.NVarChar(Max)
-  slug             String?          @db.NVarChar(255)
-  brand_id         Int?
-  category_id      Int?
+  price            Decimal          @db.Decimal(12, 2)
+  stock            Int
+  description      String           @db.NVarChar(Max)
+  slug             String           @db.NVarChar(255)
+  brand_id         Int
+  category_id      Int
   discount_percent Int?             @default(0, map: "DF__Books__discount___2EDAF651")
   status           String           @default("active", map: "DF__Books__status__7908F585") @db.VarChar(20)
+  sold             Int              @default(0, map: "DF__Books__sold__45544755")
+  isFeatured       Boolean          @default(false, map: "DF__Books__isFeature__46486B8E")
   created_at       DateTime?        @default(now(), map: "DF__Books__created_a__5165187F") @db.DateTime
   BookAttributes   BookAttributes[]
   BookAuthors      BookAuthors[]
   BookImages       BookImages[]
   BookPromotions   BookPromotions[]
-  Categories       Categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Books__category___52593CB8")
-  Brands           Brands?          @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Books_Brands")
+  Categories       Categories       @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "FK__Books__category___52593CB8")
+  Brands           Brands           @relation(fields: [brand_id], references: [id], onUpdate: NoAction, map: "FK_Books_Brands")
   CartItems        CartItems[]
   OrderItems       OrderItems[]
   Reviews          Reviews[]

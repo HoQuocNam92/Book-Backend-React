@@ -2,7 +2,6 @@ import slugify from 'slugify';
 import * as productRepo from './product.repositories'
 import { deleteProductInput, productInput } from './product.schema';
 
-import cloudinary from '../../utils/cloudinary'
 
 export const getHomeProducts = async () => await productRepo.getHomeProducts();
 export const getProductByCategory = async (category_slug: string, pageNumber: number) => await productRepo.getProductByCategory(category_slug, pageNumber);
@@ -25,12 +24,7 @@ export const deleteProduct = async (id: deleteProductInput) => {
     if (!isProduct) {
         throw new Error("NOT_FOUND_PRODUCT")
     }
-    const data = await productRepo.getProductImageById(Number(id.id));
 
-    for (let i = 0; i < data.length; i++) {
-        const url_cloudinary = "Books-brand-logos/" + data[i].url?.split('/upload/')[1].split('/')[2].split('.')[0];
-        await cloudinary.uploader.destroy(url_cloudinary)
-    }
     return await productRepo.deleteProduct(id)
 
 }

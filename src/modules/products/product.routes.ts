@@ -4,6 +4,7 @@ import { upload } from '../../utils/upload';
 const router = express.Router()
 
 router.get('/', productController.getProducts);
+
 router.get('/:category_slug', productController.getProductByCategory);
 router.post('/', upload.array("images", 10), productController.createProduct);
 
