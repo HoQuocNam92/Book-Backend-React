@@ -17,7 +17,7 @@ export const productSchema = z.object({
 
     discount_percent: z.coerce.number().min(0).max(100).default(0),
 
-    status: z.enum(["active", "draf", "archive"]).default("active"),
+    status: z.enum(["active", "draft", "archive"]).default("active"),
 
 
 

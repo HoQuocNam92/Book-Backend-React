@@ -94,13 +94,56 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
     const pageSize = 30
     const skip = (pageNumber - 1) * pageSize;
 
+    if (category_slug === "all") {
+        const totalItems = await prisma.books.count();
+        const products = await prisma.books.findMany({
+            skip,
+            take: pageSize,
+            orderBy: { id: "desc" },
+            select: {
+                id: true,
+                title: true,
+                sale_price: true,
+                price: true,
+                status: true,
+                slug: true,
+                discount_percent: true,
+                stock: true,
+                BookImages: {
+                    take: 1,
+                    select: { url: true },
+                },
+                Categories: {
+                    select: {
+                        name: true,
+                        slug: true,
+                    },
 
-    const findFirstCategory = await prisma.categories.findFirst({
-        select: { slug: true },
-        where: { parent_id: null },
-    });
-
-    const slug = category_slug || findFirstCategory?.slug;
+                }
+            },
+        });
+        const totalPages = Math.ceil(totalItems / pageSize);
+        return {
+            data: products.map((p: any) => ({
+                ...p,
+                BookImages: p.BookImages[0]?.url || null,
+                price: Number(p.price),
+                sale_price: Number(p.sale_price),
+                discount_percent: Number(p.discount_percent),
+            })),
+            pagination: {
+                page: pageNumber,
+                pageSize,
+                totalItems,
+                totalPages,
+            },
+            category: {
+                name: products[0].Categories?.name,
+                slug: products[0].Categories?.slug,
+            }
+        };
+    }
+    const slug = category_slug
 
     const parentCategory = await prisma.categories.findFirst({
         where: { slug },
@@ -132,6 +175,8 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
             sale_price: true,
             price: true,
             slug: true,
+            status: true,
+            stock: true,
             discount_percent: true,
             BookImages: {
                 take: 1,
@@ -253,11 +298,24 @@ export const createProduct = async (files: Express.Multer.File[], data: productI
 
 
 export const deleteProduct = async ({ id }: deleteProductInput) => {
-    return await prisma.books.delete({
-        where: { id }
-    })
-}
+    const deletedBook = await prisma.$transaction(async (tx: any) => {
+        const book = await tx.books.findUnique({
+            where: { id },
+        });
+        const data = await getProductImageById(Number(id));
 
+        for (let i = 0; i < data.length; i++) {
+            const url_cloudinary = "Books/" + data[i].url?.split('/').slice(-1)[0].split('.')[0];
+            await cloudinary.uploader.destroy(url_cloudinary)
+        }
+        await tx.books.delete({
+            where: { id }
+        })
+        return book;
+    });
+    return deletedBook
+
+};
 export const getProductById = async (id: number) => {
     return await prisma.books.findUnique({
         where: { id },
