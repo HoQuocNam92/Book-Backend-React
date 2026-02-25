@@ -20,7 +20,6 @@ export const refreshTokenMiddleware = async (
       id: number;
       role_id: number[];
     };
-
     const verify = await authRepo.getRefreshTokens(decoded.id);
     if (!verify) {
       throw new Error('TOKEN_NOT_FOUND');
@@ -36,7 +35,6 @@ export const refreshTokenMiddleware = async (
       id: decoded.id,
       role_id: decoded.role_id,
     };
-
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

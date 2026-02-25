@@ -14,10 +14,15 @@ const authentication = (
     if (!token) {
       throw new Error('UNAUTHORIZED');
     }
+
     const decoded = jwt.verify(
       token!,
-      process.env.REFRESHTOKEN as string,
+      process.env.ACCESSTOKEN as string,
     ) as IverifyToken;
+    if (!decoded || typeof decoded === 'string') {
+      console.log("Hello")
+      throw new Error('INVALID_TOKEN');
+    }
     req.user = decoded;
     next();
   } catch (error) {

@@ -16,6 +16,19 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
+export const getProductBySlug = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const slug = req.params.slug as string;
+        const data = await productService.getProductBySlug(slug);
+        if (!data) {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+        }
+        return res.status(200).json({ message: "Lấy sản phẩm thành công", data });
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const getProductByCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const pageNumber = Number(req.query?.page) || 1;

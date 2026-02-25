@@ -5,6 +5,7 @@ import { deleteProductInput, productInput } from './product.schema';
 
 export const getHomeProducts = async () => await productRepo.getHomeProducts();
 export const getProductByCategory = async (category_slug: string, pageNumber: number) => await productRepo.getProductByCategory(category_slug, pageNumber);
+export const getProductBySlug = async (slug: string) => await productRepo.getProductBySlug(slug);
 
 
 

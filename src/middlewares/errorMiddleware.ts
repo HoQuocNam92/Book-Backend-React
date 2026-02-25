@@ -102,6 +102,30 @@ export const errorMiddleware = (
       return res.status(404).json({
         message: 'Không tìm thấy danh mục',
       });
+    case 'UPDATE_PROFILE_FAILED':
+      return res.status(500).json({
+        message: 'Cập nhật hồ sơ thất bại, vui lòng thử lại sau',
+      });
+    case 'NOT_FOUND_ITEMS_IN_CART':
+      return res.status(404).json({
+        message: 'Không tìm thấy sản phẩm trong giỏ hàng',
+      });
+    case 'ERROR_ADDING_TO_CART':
+      return res.status(500).json({
+        message: 'Lỗi khi thêm sản phẩm vào giỏ hàng, vui lòng thử lại sau',
+      });
+    case 'ERROR_DELETING_CART_ITEM':
+      return res.status(500).json({
+        message: 'Lỗi khi xóa sản phẩm khỏi giỏ hàng, vui lòng thử lại sau',
+      });
+    case 'NOT_FOUND_CART':
+      return res.status(404).json({
+        message: 'Không tìm thấy giỏ hàng',
+      });
+    case 'ERROR_CLEARING_CART':
+      return res.status(500).json({
+        message: 'Lỗi khi xóa giỏ hàng, vui lòng thử lại sau',
+      });
     default:
       console.error('Unhandled error:', err);
       return res.status(500).json({
