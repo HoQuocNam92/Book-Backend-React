@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import * as brandServices from './brand.services';
-import { brandSchema } from './brand.schema';
+import * as brandServices from './brand.services.js';
+import { brandSchema } from './brand.schema.js';
 
 
 

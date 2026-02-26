@@ -1,6 +1,6 @@
-import prisma from '../../utils/prisma';
-import { UserProfileInput } from './user.schema';
-import cloudinary from '../../utils/cloudinary';
+import prisma from '../../utils/prisma.js';
+import { UserProfileInput } from './user.schema.js';
+import cloudinary from '../../utils/cloudinary.js';
 export const getAllUsers = async () => {
     return await prisma.users.findMany({
         select: {

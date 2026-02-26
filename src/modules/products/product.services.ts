@@ -1,6 +1,7 @@
-import slugify from 'slugify';
-import * as productRepo from './product.repositories'
-import { deleteProductInput, productInput } from './product.schema';
+import slugify from "slugify"
+
+import * as productRepo from './product.repositories.js'
+import { deleteProductInput, productInput } from './product.schema.js';
 
 
 export const getHomeProducts = async () => await productRepo.getHomeProducts();

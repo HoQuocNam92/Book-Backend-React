@@ -1,5 +1,5 @@
-import * as userRepo from './user.repositories';
-import { UserProfileInput } from './user.schema';
+import * as userRepo from './user.repositories.js';
+import { UserProfileInput } from './user.schema.js';
 
 export const getAllUsers = async () => {
     return await userRepo.getAllUsers();

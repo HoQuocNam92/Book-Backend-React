@@ -1,6 +1,6 @@
 import express from 'express'
-import * as productController from './product.controllers'
-import { upload } from '../../utils/upload';
+import * as productController from './product.controllers.js'
+import { upload } from '../../utils/upload.js';
 const router = express.Router()
 
 router.get('/', productController.getProducts);

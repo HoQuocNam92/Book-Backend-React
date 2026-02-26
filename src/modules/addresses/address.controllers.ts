@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
-import type { AuthRequest } from '../../interfaces/IAuthRequest';
-import * as addressServices from './address.services';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+import * as addressServices from './address.services.js';
+import { adddressSchema } from './address.schema.js';
 
 export const getMyAddresses = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -15,7 +16,8 @@ export const getMyAddresses = async (req: AuthRequest, res: Response, next: Next
 export const createAddress = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const userId = req.user!.id;
-        const address = await addressServices.create(userId, req.body);
+        const validateBody = adddressSchema.parse(req.body);
+        const address = await addressServices.create(userId, validateBody);
         res.status(201).json({ message: 'Thêm địa chỉ thành công', data: address });
     } catch (error) {
         next(error);
@@ -29,7 +31,8 @@ export const updateAddress = async (req: AuthRequest, res: Response, next: NextF
         if (isNaN(id)) {
             return res.status(400).json({ message: 'ID không hợp lệ' });
         }
-        const address = await addressServices.update(userId, id, req.body);
+        const validateBody = adddressSchema.parse(req.body);
+        const address = await addressServices.update(userId, id, validateBody);
         res.status(200).json({ message: 'Cập nhật địa chỉ thành công', data: address });
     } catch (error) {
         next(error);

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import type { AuthRequest } from '../../interfaces/IAuthRequest';
-import * as orderServices from './order.services';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+import * as orderServices from './order.services.js';
 
 export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -23,7 +23,7 @@ export const getAllOrders = async (req: Request, res: Response, next: NextFuncti
 
 export const getOrderById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.params.id as string);
         if (isNaN(id)) {
             return res.status(400).json({ message: 'ID không hợp lệ' });
         }
@@ -36,7 +36,7 @@ export const getOrderById = async (req: Request, res: Response, next: NextFuncti
 
 export const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.params.id as string);
         if (isNaN(id)) {
             return res.status(400).json({ message: 'ID không hợp lệ' });
         }
@@ -53,7 +53,7 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
 
 export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.params.id as string);
         if (isNaN(id)) {
             return res.status(400).json({ message: 'ID không hợp lệ' });
         }

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import prisma from '../../utils/prisma';
+import prisma from '../../utils/prisma.js';
 
 export const getOverviewStats = async (req: Request, res: Response, next: NextFunction) => {
     try {

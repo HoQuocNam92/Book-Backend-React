@@ -1,5 +1,5 @@
-import prisma from "../../utils/prisma"
-import { categoryInput } from "./category.schema";
+import prisma from "../../utils/prisma.js"
+import { categoryInput } from "./category.schema.js";
 
 export const getAllCategories = async () => {
     return await prisma.categories.findMany();

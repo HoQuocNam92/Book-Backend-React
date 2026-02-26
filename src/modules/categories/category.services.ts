@@ -1,6 +1,6 @@
 import slugify from 'slugify';
-import * as categoryRepository from './category.repositories';
-import { categoryInput } from './category.schema';
+import * as categoryRepository from './category.repositories.js';
+import { categoryInput } from './category.schema.js';
 
 
 

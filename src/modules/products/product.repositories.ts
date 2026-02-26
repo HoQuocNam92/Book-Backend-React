@@ -1,7 +1,7 @@
-import prisma from "../../utils/prisma";
-import { deleteProductInput, productInput } from "./product.schema";
+import prisma from "../../utils/prisma.js";
+import { deleteProductInput, productInput } from "./product.schema.js";
 
-import cloudinary from '../../utils/cloudinary'
+import cloudinary from '../../utils/cloudinary.js'
 
 export const getHomeProducts = async () => {
     const take = 12;

@@ -1,4 +1,5 @@
-import prisma from '../../utils/prisma';
+import prisma from '../../utils/prisma.js';
+import { AddressInput, } from './address.schema.js';
 
 export const getByUserId = async (userId: number) => {
     return await prisma.addresses.findMany({
@@ -25,22 +26,16 @@ export const getById = async (id: number) => {
 
 export const create = async (
     userId: number,
-    data: {
-        address: string;
-        phone?: string;
-        province_id?: number;
-        district_id?: number;
-        ward_id?: number;
-    }
+    data: AddressInput
 ) => {
     return await prisma.addresses.create({
         data: {
             user_id: userId,
             address: data.address,
             phone: data.phone,
-            province_id: data.province_id,
-            district_id: data.district_id,
-            ward_id: data.ward_id,
+            province_code: data.province_code,
+            district_code: data.district_code,
+            ward_code: data.ward_code,
         },
         include: {
             Provinces: { select: { name: true } },
@@ -52,22 +47,18 @@ export const create = async (
 
 export const update = async (
     id: number,
-    data: {
-        address?: string;
-        phone?: string;
-        province_id?: number;
-        district_id?: number;
-        ward_id?: number;
-    }
+    data: AddressInput
 ) => {
     return await prisma.addresses.update({
         where: { id },
-        data,
-        include: {
-            Provinces: { select: { name: true } },
-            Districts: { select: { name: true } },
-            Wards: { select: { name: true } },
+        data: {
+            address: data.address,
+            phone: data.phone,
+            province_code: data.province_code,
+            district_code: data.district_code,
+            ward_code: data.ward_code,
         },
+
     });
 };
 

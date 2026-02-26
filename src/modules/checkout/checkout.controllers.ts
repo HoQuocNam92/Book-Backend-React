@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import type { AuthRequest } from '../../interfaces/IAuthRequest';
-import * as checkoutServices from './checkout.services';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+import * as checkoutServices from './checkout.services.js';
 
 export const placeOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {

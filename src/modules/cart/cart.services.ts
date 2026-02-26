@@ -1,6 +1,6 @@
-import * as cartRepo from './cart.repositories';
-import prisma from '../../utils/prisma';
-import { AddToCartInput } from './cart.schema';
+import * as cartRepo from './cart.repositories.js';
+import prisma from '../../utils/prisma.js';
+import { AddToCartInput } from './cart.schema.js';
 
 export const getCart = async (userId: number) => {
     return await cartRepo.getCartByUserId(userId);

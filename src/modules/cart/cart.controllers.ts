@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
-import type { AuthRequest } from '../../interfaces/IAuthRequest';
-import * as cartServices from './cart.services';
-import { AddToCartSchema, UpdateCartItemQtySchema } from './cart.schema';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+import * as cartServices from './cart.services.js';
+import { AddToCartSchema, UpdateCartItemQtySchema } from './cart.schema.js';
 
 export const getCart = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {

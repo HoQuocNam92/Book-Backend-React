@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import type { AuthRequest } from '../../interfaces/IAuthRequest';
-import * as userServices from './user.services';
-import { userProfileSchema } from './user.schema';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+import * as userServices from './user.services.js';
+import { userProfileSchema } from './user.schema.js';
 
 export const getProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {

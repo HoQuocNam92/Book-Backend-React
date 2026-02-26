@@ -1,4 +1,4 @@
-import prisma from '../../utils/prisma';
+import prisma from '../../utils/prisma.js';
 
 // Place order from cart
 export const placeOrder = async (
@@ -7,7 +7,6 @@ export const placeOrder = async (
     paymentMethod: string
 ) => {
     return await prisma.$transaction(async (tx: any) => {
-        // 1. Get cart with items
         const cart = await tx.carts.findUnique({
             where: { user_id: userId },
             include: {
@@ -29,7 +28,7 @@ export const placeOrder = async (
         });
 
         if (!cart || cart.CartItems.length === 0) {
-            throw { status: 400, message: 'Giỏ hàng trống' };
+            throw new Error("CART_EMPTY");
         }
 
         // 2. Validate stock and calculate total
@@ -39,10 +38,10 @@ export const placeOrder = async (
         for (const item of cart.CartItems) {
             const book = item.Books;
             if (!book || book.status !== 'active') {
-                throw { status: 400, message: `Sản phẩm "${book?.title || 'Unknown'}" không khả dụng` };
+                throw new Error("BOOK_UNAVAILABLE")
             }
             if (book.stock < (item.quantity || 0)) {
-                throw { status: 400, message: `Sản phẩm "${book.title}" chỉ còn ${book.stock} trong kho` };
+                throw new Error("INSUFFICIENT_STOCK")
             }
 
             const salePrice = book.sale_price ? Number(book.sale_price) : 0;

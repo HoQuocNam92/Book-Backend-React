@@ -1,4 +1,4 @@
-import * as orderRepo from './order.repositories';
+import * as orderRepo from './order.repositories.js';
 
 export const getAllOrders = async () => {
     return await orderRepo.getAllOrders();

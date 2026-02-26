@@ -9,19 +9,18 @@ datasource db {
 }
 
 model Addresses {
-  id          Int        @id(map: "PK__Addresse__3213E83FB1D70DA3") @default(autoincrement())
-  user_id     Int?
-  address     String?    @db.NVarChar(255)
-  city        String?    @db.NVarChar(100)
-  phone       String?    @db.VarChar(20)
-  province_id Int?
-  district_id Int?
-  ward_id     Int?
-  Users       Users?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Addresses__user___4222D4EF")
-  Districts   Districts? @relation(fields: [district_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_District")
-  Provinces   Provinces? @relation(fields: [province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_Province")
-  Wards       Wards?     @relation(fields: [ward_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_Ward")
-  Orders      Orders[]
+  id            Int       @id(map: "PK__Addresse__3213E83FB1D70DA3") @default(autoincrement())
+  user_id       Int
+  address       String    @db.NVarChar(255)
+  phone         String    @db.VarChar(20)
+  province_code Int
+  district_code Int
+  ward_code     Int
+  Users         Users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "FK__Addresses__user___4222D4EF")
+  Districts     Districts @relation(fields: [district_code], references: [code], onUpdate: NoAction, map: "FK_Addresses_Districts")
+  Provinces     Provinces @relation(fields: [province_code], references: [code], onUpdate: NoAction, map: "FK_Addresses_Provinces")
+  Wards         Wards     @relation(fields: [ward_code], references: [code], onUpdate: NoAction, map: "FK_Addresses_Wards")
+  Orders        Orders[]
 }
 
 model Authors {

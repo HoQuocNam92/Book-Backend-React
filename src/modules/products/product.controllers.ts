@@ -2,10 +2,10 @@
 
 
 import { NextFunction, Request, Response } from 'express'
-import * as productService from './product.services'
-import { deleteProductSchema, productSchema } from './product.schema';
+import * as productService from './product.services.js'
+import { deleteProductSchema, productSchema } from './product.schema.js';
 
-import redisClient from '../../utils/redis';
+import redisClient from '../../utils/redis.js';
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -1,13 +1,13 @@
-import * as checkoutRepo from './checkout.repositories';
+import * as checkoutRepo from './checkout.repositories.js';
 
 export const placeOrder = async (userId: number, addressId: number, paymentMethod: string) => {
     const validMethods = ['cod', 'bank_transfer'];
     if (!validMethods.includes(paymentMethod)) {
-        throw { status: 400, message: 'Phương thức thanh toán không hợp lệ' };
+        throw new Error("METHOD_NOT_SUPPORTED")
     }
 
     if (!addressId) {
-        throw { status: 400, message: 'Vui lòng chọn địa chỉ giao hàng' };
+        throw new Error("ADDRESS_NOT_SELECTED");
     }
 
     return await checkoutRepo.placeOrder(userId, addressId, paymentMethod);

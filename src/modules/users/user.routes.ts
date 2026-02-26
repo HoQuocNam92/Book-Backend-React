@@ -1,7 +1,7 @@
 import express from 'express';
-import authentication from '../../middlewares/auth/authentication';
-import * as userControllers from './user.controllers';
-import { upload } from '../../utils/upload';
+import authentication from '../../middlewares/auth/authentication.js';
+import * as userControllers from './user.controllers.js';
+import { upload } from '../../utils/upload.js';
 
 const router = express.Router();
 
