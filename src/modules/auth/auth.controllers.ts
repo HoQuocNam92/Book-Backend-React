@@ -33,21 +33,22 @@ export const signIn = async (
 ) => {
   try {
     const data = signInSchema.parse(req.body);
-    const { accessToken, refreshToken } = await authService.signIn(data);
+    const { user, accessToken, refreshToken } = await authService.signIn(data);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 604800,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'strict',
       secure: false,
     });
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      maxAge: 3600,
+      maxAge: 60 * 60 * 1000,
       sameSite: 'strict',
       secure: false,
     });
     res.status(200).json({
       message: 'Đăng nhập thành công',
+      user: user,
     });
   } catch (err) {
     next(err);
@@ -80,13 +81,13 @@ export const signInWithGoogle = async (
     const { accessToken, refreshToken }: any = await authService.signInWithGoogle(code as string);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 604800,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'strict',
       secure: false,
     });
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      maxAge: 3600,
+      maxAge: 60 * 60 * 1000,
       sameSite: 'strict',
       secure: false,
     });
@@ -125,13 +126,13 @@ export const refreshToken = async (
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 604800,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'strict',
       secure: false,
     });
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      maxAge: 3600,
+      maxAge: 60 * 60 * 1000,
       sameSite: 'strict',
       secure: false,
     });
@@ -180,6 +181,7 @@ export const signOut = async (
   res: Response) => {
   try {
     await authService.signOut(req.user?.id!);
+    res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
     return res.status(200).json({
       message: 'Đăng xuất thành công',

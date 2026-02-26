@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { AuthRequest } from '../../interfaces/IAuthRequest';
+import { AuthRequest } from '../../interfaces/IAuthRequest.js';
 import * as authRepo from '../../modules/auth/auth.repositories.js';
 import bcrypt from 'bcrypt';
 export const refreshTokenMiddleware = async (
@@ -20,7 +20,6 @@ export const refreshTokenMiddleware = async (
       id: number;
       role_id: number[];
     };
-
     const verify = await authRepo.getRefreshTokens(decoded.id);
     if (!verify) {
       throw new Error('TOKEN_NOT_FOUND');
@@ -36,7 +35,6 @@ export const refreshTokenMiddleware = async (
       id: decoded.id,
       role_id: decoded.role_id,
     };
-
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

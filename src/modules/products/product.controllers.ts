@@ -2,15 +2,28 @@
 
 
 import { NextFunction, Request, Response } from 'express'
-import * as productService from './product.services'
-import { deleteProductSchema, productSchema } from './product.schema';
+import * as productService from './product.services.js'
+import { deleteProductSchema, productSchema } from './product.schema.js';
 
-import redisClient from '../../utils/redis';
+import redisClient from '../../utils/redis.js';
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = await productService.getHomeProducts();
         return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công", data });
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const getProductBySlug = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const slug = req.params.slug as string;
+        const data = await productService.getProductBySlug(slug);
+        if (!data) {
+            return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+        }
+        return res.status(200).json({ message: "Lấy sản phẩm thành công", data });
     } catch (error) {
         next(error)
     }

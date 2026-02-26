@@ -1,6 +1,6 @@
-import authentication from '../../middlewares/auth/authentication';
-import refreshTokenMiddleware from '../../middlewares/auth/refreshTokenMiddleware';
-import * as authController from './auth.controllers';
+import authentication from '../../middlewares/auth/authentication.js';
+import refreshTokenMiddleware from '../../middlewares/auth/refreshTokenMiddleware.js';
+import * as authController from './auth.controllers.js';
 import express from 'express';
 
 const router = express.Router();

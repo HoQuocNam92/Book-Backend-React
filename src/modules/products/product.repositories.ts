@@ -1,7 +1,7 @@
-import prisma from "../../utils/prisma";
-import { deleteProductInput, productInput } from "./product.schema";
+import prisma from "../../utils/prisma.js";
+import { deleteProductInput, productInput } from "./product.schema.js";
 
-import cloudinary from '../../utils/cloudinary'
+import cloudinary from '../../utils/cloudinary.js'
 
 export const getHomeProducts = async () => {
     const take = 12;
@@ -13,8 +13,8 @@ export const getHomeProducts = async () => {
             BookImages: {
                 take: 1,
                 select: { url: true },
-            }
-        },
+            },
+        }
     });
 
     const discountBooksPromise = prisma.books.findMany({
@@ -45,10 +45,9 @@ export const getHomeProducts = async () => {
         discountBooksPromise,
         bestSellerPromise,
     ]);
-
     const bestSellerIds = bestSellerRaw
-        .map((x) => x.book_id)
-        .filter((id): id is number => id !== null);
+        .map((x: any) => x.book_id)
+        .filter((id: any): id is number => id !== null);
 
 
     let bestSellerBooks: any[] = [];
@@ -64,18 +63,19 @@ export const getHomeProducts = async () => {
             },
         });
 
-        const map = new Map(
-            bestSellerRaw.map((x) => [x.book_id, x._sum.quantity])
+        const map = new Map<number, number>(
+            bestSellerRaw.map((x: any) => [x.book_id, x._sum.quantity ?? 0])
         );
 
         bestSellerBooks = books.sort(
-            (a, b) => (map.get(b.id) ?? 0) - (map.get(a.id) ?? 0)
+            (a: any, b: any) => (map.get(b.id) ?? 0) - (map.get(a.id) ?? 0)
         );
     }
 
     const formatBook = (p: any) => ({
         ...p,
-        BookImages: p.BookImages.url,
+
+        BookImages: p.BookImages[0]?.url || null,
         price: Number(p.price),
         sale_price: Number(p.sale_price),
         discount_percent: Number(p.discount_percent),
@@ -251,7 +251,7 @@ export const createProduct = async (files: Express.Multer.File[], data: productI
 
             if (data.attri?.length) {
                 await tx.bookAttributes.createMany({
-                    data: data.attri.map((e) => ({
+                    data: data.attri.map((e: any) => ({
                         book_id: book.id,
                         attr_key: e.key,
                         attr_value: e.value,
@@ -326,6 +326,63 @@ export const getProductById = async (id: number) => {
     })
 }
 
+export const getProductBySlug = async (slug: string) => {
+    const product = await prisma.books.findFirst({
+        where: { slug },
+        include: {
+            BookImages: true,
+            Categories: true,
+            Brands: true,
+            BookAuthors: {
+                include: {
+                    Authors: true,
+                }
+            },
+            BookAttributes: true,
+            Reviews: {
+                include: {
+                    Users: {
+                        select: { name: true, id: true }
+                    }
+                },
+                orderBy: { create_at: 'desc' },
+                take: 20,
+            },
+            BookPromotions: true
+        }
+    });
+
+    if (!product) return null;
+
+    const relatedBooks = await prisma.books.findMany({
+        where: {
+            category_id: product.category_id,
+            id: { not: product.id },
+        },
+        take: 6,
+        include: {
+            BookImages: {
+                take: 1,
+                select: { url: true },
+            }
+        },
+    });
+
+    return {
+        ...product,
+        price: Number(product.price),
+        sale_price: product.sale_price ? Number(product.sale_price) : null,
+        discount_percent: product.discount_percent || 0,
+        relatedBooks: relatedBooks.map((b: any) => ({
+            ...b,
+            BookImages: b.BookImages[0]?.url,
+            price: Number(b.price),
+            sale_price: b.sale_price ? Number(b.sale_price) : null,
+            discount_percent: b.discount_percent || 0,
+        })),
+    };
+}
+
 export const getProductImageById = async (id: number) => {
     return await prisma.bookImages.findMany({
         where: {
@@ -368,7 +425,7 @@ export const updateProduct = async (files: Express.Multer.File[], id: number, da
 
             if (data.attri?.length) {
                 await tx.bookAttributes.createMany({
-                    data: data.attri.map((e) => ({
+                    data: data.attri.map((e: any) => ({
                         book_id: id,
                         attr_key: e.key,
                         attr_value: e.value,
@@ -379,7 +436,7 @@ export const updateProduct = async (files: Express.Multer.File[], id: number, da
 
 
             await tx.bookImages.createMany({
-                data: uploadedAssets.map((url) => (
+                data: uploadedAssets.map((url: any) => (
                     {
                         book_id: book.id,
                         url: url.secure_url

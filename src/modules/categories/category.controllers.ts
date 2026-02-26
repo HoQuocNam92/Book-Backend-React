@@ -1,7 +1,7 @@
 
 
-import { categorySchema } from './category.schema';
-import * as categoryService from './category.services';
+import { categorySchema } from './category.schema.js';
+import * as categoryService from './category.services.js';
 import { Request, Response, NextFunction } from 'express';
 
 

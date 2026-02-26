@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
-import * as brandControllers from './brand.controllers';
-import { upload } from '../../utils/upload';
+import * as brandControllers from './brand.controllers.js';
+import { upload } from '../../utils/upload.js';
 
 
 router.get('/', brandControllers.getAllBrands);

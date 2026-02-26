@@ -9,19 +9,18 @@ datasource db {
 }
 
 model Addresses {
-  id          Int        @id(map: "PK__Addresse__3213E83FB1D70DA3") @default(autoincrement())
-  user_id     Int?
-  address     String?    @db.NVarChar(255)
-  city        String?    @db.NVarChar(100)
-  phone       String?    @db.VarChar(20)
-  province_id Int?
-  district_id Int?
-  ward_id     Int?
-  Users       Users?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Addresses__user___4222D4EF")
-  Districts   Districts? @relation(fields: [district_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_District")
-  Provinces   Provinces? @relation(fields: [province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_Province")
-  Wards       Wards?     @relation(fields: [ward_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Addresses_Ward")
-  Orders      Orders[]
+  id            Int       @id(map: "PK__Addresse__3213E83FB1D70DA3") @default(autoincrement())
+  user_id       Int
+  address       String    @db.NVarChar(255)
+  phone         String    @db.VarChar(20)
+  province_code Int
+  district_code Int
+  ward_code     Int
+  Users         Users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "FK__Addresses__user___4222D4EF")
+  Districts     Districts @relation(fields: [district_code], references: [code], onUpdate: NoAction, map: "FK_Addresses_Districts")
+  Provinces     Provinces @relation(fields: [province_code], references: [code], onUpdate: NoAction, map: "FK_Addresses_Provinces")
+  Wards         Wards     @relation(fields: [ward_code], references: [code], onUpdate: NoAction, map: "FK_Addresses_Wards")
+  Orders        Orders[]
 }
 
 model Authors {
@@ -113,7 +112,7 @@ model CartItems {
   book_id  Int?
   quantity Int?
   Books    Books? @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__CartItems__book___619B8048")
-  Carts    Carts? @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__CartItems__cart___60A75C0F")
+  Carts    Carts? @relation(fields: [cart_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK__CartItems__cart___60A75C0F")
 }
 
 model Carts {
@@ -143,12 +142,13 @@ model Coupons {
 }
 
 model Districts {
-  id          Int         @id(map: "PK__District__3213E83F58C7D668") @default(autoincrement())
-  province_id Int
-  name        String      @db.NVarChar(100)
-  Addresses   Addresses[]
-  Provinces   Provinces   @relation(fields: [province_id], references: [id], onUpdate: NoAction, map: "FK__Districts__provi__2739D489")
-  Wards       Wards[]
+  id            Int         @id(map: "PK_Districts_1") @default(autoincrement())
+  code          Int         @unique(map: "UQ_Districts_Code")
+  province_code Int
+  name          String      @db.NVarChar(100)
+  Addresses     Addresses[]
+  Provinces     Provinces   @relation(fields: [province_code], references: [code], onUpdate: NoAction, map: "FK_Districts_Provinces1")
+  Wards         Wards[]
 }
 
 model News {
@@ -206,8 +206,9 @@ model Payments {
 }
 
 model Provinces {
-  id        Int         @id(map: "PK__Province__3213E83FD9F00974") @default(autoincrement())
+  id        Int         @id(map: "PK_Provinces_1") @default(autoincrement())
   name      String      @db.NVarChar(100)
+  code      Int         @unique(map: "UQ_Provinces_Code")
   Addresses Addresses[]
   Districts Districts[]
 }
@@ -235,13 +236,14 @@ model ResetPassword {
 }
 
 model Reviews {
-  id      Int     @id(map: "PK__Reviews__3213E83FC28AE824") @default(autoincrement())
-  user_id Int?
-  book_id Int?
-  rating  Int?
-  comment String? @db.NVarChar(500)
-  Books   Books?  @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reviews__book_id__73BA3083")
-  Users   Users?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reviews__user_id__72C60C4A")
+  id        Int       @id(map: "PK__Reviews__3213E83FC28AE824") @default(autoincrement())
+  user_id   Int?
+  book_id   Int?
+  rating    Int?
+  comment   String?   @db.NVarChar(500)
+  create_at DateTime? @default(now(), map: "DF_Reviews_create_at") @db.Date
+  Books     Books?    @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reviews__book_id__73BA3083")
+  Users     Users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reviews__user_id__72C60C4A")
 }
 
 model Roles {
@@ -297,9 +299,10 @@ model Users {
 }
 
 model Wards {
-  id          Int         @id(map: "PK__Wards__3213E83FD364F749") @default(autoincrement())
-  district_id Int
-  name        String      @db.NVarChar(100)
-  Addresses   Addresses[]
-  Districts   Districts   @relation(fields: [district_id], references: [id], onUpdate: NoAction, map: "FK__Wards__district___2A164134")
+  id            Int         @id(map: "PK_Wards_1") @default(autoincrement())
+  name          String?     @db.NVarChar(255)
+  code          Int         @unique(map: "UQ_Wards_Code")
+  district_code Int?
+  Addresses     Addresses[]
+  Districts     Districts?  @relation(fields: [district_code], references: [code], onDelete: NoAction, onUpdate: NoAction, map: "FK_Wards_Districts1")
 }

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import 'dotenv';
-import { IverifyToken } from '../../interfaces/IverifyToken';
-import type { AuthRequest } from '../../interfaces/IAuthRequest';
+import { IverifyToken } from '../../interfaces/IverifyToken.js';
+import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
 
 const authentication = (
   req: AuthRequest,
@@ -14,10 +14,15 @@ const authentication = (
     if (!token) {
       throw new Error('UNAUTHORIZED');
     }
+
     const decoded = jwt.verify(
       token!,
-      process.env.REFRESHTOKEN as string,
+      process.env.ACCESSTOKEN as string,
     ) as IverifyToken;
+    if (!decoded || typeof decoded === 'string') {
+      console.log("Hello")
+      throw new Error('INVALID_TOKEN');
+    }
     req.user = decoded;
     next();
   } catch (error) {

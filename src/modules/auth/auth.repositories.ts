@@ -1,6 +1,6 @@
-import prisma from '../../utils/prisma';
+import prisma from '../../utils/prisma.js';
 import type { Prisma } from '@prisma/client';
-import { passwordInput } from './auth.schema';
+import { passwordInput } from './auth.schema.js';
 
 export const findUserByEmail = async (email: string) => {
   return await prisma.users.findUnique({
@@ -68,7 +68,7 @@ export const addRefreshTokens = async (
 };
 
 export const getRefreshTokens = async (id: number) => {
-  return await prisma.refreshTokens.findFirst({ where: { Id: id } });
+  return await prisma.refreshTokens.findFirst({ where: { UserId: id } });
 };
 
 export const deleteRefreshTokens = async (user_id: number) => {

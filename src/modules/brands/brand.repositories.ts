@@ -1,6 +1,6 @@
-import prisma from '../../utils/prisma';
-import { brandInput } from './brand.schema';
-import cloudinary from '../../utils/cloudinary'
+import prisma from '../../utils/prisma.js';
+import { brandInput } from './brand.schema.js';
+import cloudinary from '../../utils/cloudinary.js'
 
 export const getAllBrands = async () => {
     return await prisma.brands.findMany();

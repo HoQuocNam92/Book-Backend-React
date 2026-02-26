@@ -1,6 +1,6 @@
 import slugify from 'slugify';
-import * as brandRepositories from './brand.repositories';
-import { brandInput } from './brand.schema';
+import * as brandRepositories from './brand.repositories.js';
+import { brandInput } from './brand.schema.js';
 
 
 
