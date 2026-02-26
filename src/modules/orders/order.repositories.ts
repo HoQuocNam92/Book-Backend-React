@@ -17,7 +17,6 @@ export const getAllOrders = async () => {
             Addresses: {
                 select: {
                     address: true,
-                    city: true,
                     phone: true,
                 },
             },

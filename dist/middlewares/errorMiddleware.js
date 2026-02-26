@@ -113,6 +113,38 @@ const errorMiddleware = (err, req, res, next) => {
             return res.status(500).json({
                 message: 'Lỗi khi xóa giỏ hàng, vui lòng thử lại sau',
             });
+        case 'NOT_FOUND_ADDRESS':
+            return res.status(404).json({
+                message: 'Không tìm thấy địa chỉ'
+            });
+        case 'FORBIDDEN_ADDRESS':
+            return res.status(403).json({
+                message: 'Bạn không có quyền thực hiện hành động này với địa chỉ'
+            });
+        case 'ADDRESS_REQUIRED':
+            return res.status(400).json({
+                message: 'Địa chỉ chi tiết là bắt buộc'
+            });
+        case 'ADDRESS_NOT_SELECTED':
+            return res.status(400).json({
+                message: 'Vui lòng chọn địa chỉ giao hàng'
+            });
+        case 'METHOD_NOT_SUPPORTED':
+            return res.status(400).json({
+                message: 'Phương thức thanh toán không hợp lệ'
+            });
+        case 'CART_EMPTY':
+            return res.status(400).json({
+                message: 'Giỏ hàng trống',
+            });
+        case 'BOOK_UNAVAILABLE':
+            return res.status(400).json({
+                message: 'Sản phẩm không khả dụng',
+            });
+        case 'INSUFFICIENT_STOCK':
+            return res.status(400).json({
+                message: 'Sản phẩm không đủ số lượng trong kho',
+            });
         default:
             console.error('Unhandled error:', err);
             return res.status(500).json({

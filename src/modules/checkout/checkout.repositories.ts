@@ -107,12 +107,21 @@ export const placeOrder = async (
                 OrderItems: {
                     include: {
                         Books: {
-                            select: { id: true, title: true, slug: true },
+                            select: { title: true },
                         },
                     },
                 },
-                Addresses: true,
-                Payments: true,
+                Addresses: { select: { address: true } },
+                Payments: { select: { method: true, status: true } },
+                Users: {
+                    select: {
+                        name: true, email: true,
+                        UserProfile: {
+                            select: { Phone: true }
+                        }
+                    },
+
+                }
             },
         });
     });

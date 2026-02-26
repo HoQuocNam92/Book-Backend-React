@@ -8,7 +8,6 @@ const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
 // Place order from cart
 const placeOrder = async (userId, addressId, paymentMethod) => {
     return await prisma_js_1.default.$transaction(async (tx) => {
-        // 1. Get cart with items
         const cart = await tx.carts.findUnique({
             where: { user_id: userId },
             include: {
@@ -29,7 +28,7 @@ const placeOrder = async (userId, addressId, paymentMethod) => {
             },
         });
         if (!cart || cart.CartItems.length === 0) {
-            throw { status: 400, message: 'Giỏ hàng trống' };
+            throw new Error("CART_EMPTY");
         }
         // 2. Validate stock and calculate total
         let total = 0;
@@ -37,10 +36,10 @@ const placeOrder = async (userId, addressId, paymentMethod) => {
         for (const item of cart.CartItems) {
             const book = item.Books;
             if (!book || book.status !== 'active') {
-                throw { status: 400, message: `Sản phẩm "${book?.title || 'Unknown'}" không khả dụng` };
+                throw new Error("BOOK_UNAVAILABLE");
             }
             if (book.stock < (item.quantity || 0)) {
-                throw { status: 400, message: `Sản phẩm "${book.title}" chỉ còn ${book.stock} trong kho` };
+                throw new Error("INSUFFICIENT_STOCK");
             }
             const salePrice = book.sale_price ? Number(book.sale_price) : 0;
             const price = Number(book.price);
@@ -98,12 +97,20 @@ const placeOrder = async (userId, addressId, paymentMethod) => {
                 OrderItems: {
                     include: {
                         Books: {
-                            select: { id: true, title: true, slug: true },
+                            select: { title: true },
                         },
                     },
                 },
-                Addresses: true,
-                Payments: true,
+                Addresses: { select: { address: true } },
+                Payments: { select: { method: true, status: true } },
+                Users: {
+                    select: {
+                        name: true, email: true,
+                        UserProfile: {
+                            select: { Phone: true }
+                        }
+                    },
+                }
             },
         });
     });

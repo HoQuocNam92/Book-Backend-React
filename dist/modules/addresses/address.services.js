@@ -42,14 +42,14 @@ exports.getByUserId = getByUserId;
 const getById = async (id) => {
     const address = await addressRepo.getById(id);
     if (!address) {
-        throw { status: 404, message: 'Không tìm thấy địa chỉ' };
+        throw new Error("NOT_FOUND_ADDRESS");
     }
     return address;
 };
 exports.getById = getById;
 const create = async (userId, data) => {
     if (!data.address || data.address.trim() === '') {
-        throw { status: 400, message: 'Vui lòng nhập địa chỉ' };
+        throw new Error("ADDRESS_REQUIRED");
     }
     return await addressRepo.create(userId, data);
 };
@@ -57,10 +57,10 @@ exports.create = create;
 const update = async (userId, id, data) => {
     const existing = await addressRepo.getById(id);
     if (!existing) {
-        throw { status: 404, message: 'Không tìm thấy địa chỉ' };
+        throw new Error("NOT_FOUND_ADDRESS");
     }
     if (existing.user_id !== userId) {
-        throw { status: 403, message: 'Bạn không có quyền sửa địa chỉ này' };
+        throw new Error("FORBIDDEN_ADDRESS");
     }
     return await addressRepo.update(id, data);
 };
@@ -68,10 +68,10 @@ exports.update = update;
 const deleteAddress = async (userId, id) => {
     const existing = await addressRepo.getById(id);
     if (!existing) {
-        throw { status: 404, message: 'Không tìm thấy địa chỉ' };
+        throw new Error("NOT_FOUND_ADDRESS");
     }
     if (existing.user_id !== userId) {
-        throw { status: 403, message: 'Bạn không có quyền xóa địa chỉ này' };
+        throw new Error("FORBIDDEN_ADDRESS");
     }
     return await addressRepo.deleteAddress(id);
 };

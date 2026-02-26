@@ -34,9 +34,9 @@ const create = async (userId, data) => {
             user_id: userId,
             address: data.address,
             phone: data.phone,
-            province_id: data.province_id,
-            district_id: data.district_id,
-            ward_id: data.ward_id,
+            province_code: data.province_code,
+            district_code: data.district_code,
+            ward_code: data.ward_code,
         },
         include: {
             Provinces: { select: { name: true } },
@@ -49,11 +49,12 @@ exports.create = create;
 const update = async (id, data) => {
     return await prisma_js_1.default.addresses.update({
         where: { id },
-        data,
-        include: {
-            Provinces: { select: { name: true } },
-            Districts: { select: { name: true } },
-            Wards: { select: { name: true } },
+        data: {
+            address: data.address,
+            phone: data.phone,
+            province_code: data.province_code,
+            district_code: data.district_code,
+            ward_code: data.ward_code,
         },
     });
 };

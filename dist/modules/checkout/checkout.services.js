@@ -32,18 +32,29 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserAddresses = exports.placeOrder = void 0;
+const order_queue_js_1 = __importDefault(require("../../queue/order.queue.js"));
 const checkoutRepo = __importStar(require("./checkout.repositories.js"));
 const placeOrder = async (userId, addressId, paymentMethod) => {
     const validMethods = ['cod', 'bank_transfer'];
     if (!validMethods.includes(paymentMethod)) {
-        throw { status: 400, message: 'Phương thức thanh toán không hợp lệ' };
+        throw new Error("METHOD_NOT_SUPPORTED");
     }
     if (!addressId) {
-        throw { status: 400, message: 'Vui lòng chọn địa chỉ giao hàng' };
+        throw new Error("ADDRESS_NOT_SELECTED");
     }
-    return await checkoutRepo.placeOrder(userId, addressId, paymentMethod);
+    const order = await checkoutRepo.placeOrder(userId, addressId, paymentMethod);
+    await order_queue_js_1.default.add('newOrder', order, {
+        removeOnComplete: true, attempts: 5, backoff: {
+            type: "exponential",
+            delay: 3000,
+        },
+    });
+    return order;
 };
 exports.placeOrder = placeOrder;
 const getUserAddresses = async (userId) => {

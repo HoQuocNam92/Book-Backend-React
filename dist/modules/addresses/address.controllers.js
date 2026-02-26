@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getWards = exports.getDistricts = exports.getProvinces = exports.deleteAddress = exports.updateAddress = exports.createAddress = exports.getMyAddresses = void 0;
 const addressServices = __importStar(require("./address.services.js"));
+const address_schema_js_1 = require("./address.schema.js");
 const getMyAddresses = async (req, res, next) => {
     try {
         const userId = req.user.id;
@@ -49,7 +50,8 @@ exports.getMyAddresses = getMyAddresses;
 const createAddress = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const address = await addressServices.create(userId, req.body);
+        const validateBody = address_schema_js_1.adddressSchema.parse(req.body);
+        const address = await addressServices.create(userId, validateBody);
         res.status(201).json({ message: 'Thêm địa chỉ thành công', data: address });
     }
     catch (error) {
@@ -64,7 +66,8 @@ const updateAddress = async (req, res, next) => {
         if (isNaN(id)) {
             return res.status(400).json({ message: 'ID không hợp lệ' });
         }
-        const address = await addressServices.update(userId, id, req.body);
+        const validateBody = address_schema_js_1.adddressSchema.parse(req.body);
+        const address = await addressServices.update(userId, id, validateBody);
         res.status(200).json({ message: 'Cập nhật địa chỉ thành công', data: address });
     }
     catch (error) {

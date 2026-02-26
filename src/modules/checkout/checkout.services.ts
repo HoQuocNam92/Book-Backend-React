@@ -1,3 +1,4 @@
+import orderQueue from '../../queue/order.queue.js';
 import * as checkoutRepo from './checkout.repositories.js';
 
 export const placeOrder = async (userId: number, addressId: number, paymentMethod: string) => {
@@ -9,8 +10,14 @@ export const placeOrder = async (userId: number, addressId: number, paymentMetho
     if (!addressId) {
         throw new Error("ADDRESS_NOT_SELECTED");
     }
-
-    return await checkoutRepo.placeOrder(userId, addressId, paymentMethod);
+    const order = await checkoutRepo.placeOrder(userId, addressId, paymentMethod);
+    await orderQueue.add('newOrder', order, {
+        removeOnComplete: true, attempts: 5, backoff: {
+            type: "exponential",
+            delay: 3000,
+        },
+    });
+    return order;
 };
 
 export const getUserAddresses = async (userId: number) => {

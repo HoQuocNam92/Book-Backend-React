@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // export default redisClient
 const redis_1 = require("redis");
 const redisClient = (0, redis_1.createClient)({
-    url: `redis://${process.env.REDIS_HOST}:${process.env.PORT_REDIS}`
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
 });
 redisClient.on("error", (err) => {
     console.error("Redis Client Error", err);
