@@ -1,8 +1,12 @@
 import prisma from '../../utils/prisma.js';
 import { UserProfileInput } from './user.schema.js';
 import cloudinary from '../../utils/cloudinary.js';
-export const getAllUsers = async () => {
-    return await prisma.users.findMany({
+const page_size = 20;
+export const getAllUsers = async (page: number) => {
+    const skip = (page - 1) * page_size;
+    const user = await prisma.users.findMany({
+        skip,
+        take: page_size,
         select: {
             id: true,
             name: true,
@@ -29,6 +33,13 @@ export const getAllUsers = async () => {
         },
         orderBy: { created_at: 'desc' },
     });
+
+
+    const totalPages = Math.ceil(await prisma.users.count() / page_size);
+    return {
+        users: user,
+        totalPages,
+    };
 };
 
 export const getUserById = async (id: number) => {

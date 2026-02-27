@@ -1,8 +1,8 @@
 import * as userRepo from './user.repositories.js';
 import { UserProfileInput } from './user.schema.js';
 
-export const getAllUsers = async () => {
-    return await userRepo.getAllUsers();
+export const getAllUsers = async (page: number) => {
+    return await userRepo.getAllUsers(page);
 };
 
 export const getUserById = async (id: number) => {
