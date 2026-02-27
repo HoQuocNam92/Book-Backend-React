@@ -1,16 +1,10 @@
 import prisma from '../../utils/prisma.js';
-<<<<<<< Updated upstream
-
-export const getAllOrders = async () => {
-    return await prisma.orders.findMany({
-=======
 const pageSize: number = 30;
 export const getAllOrders = async (pageNumber: number) => {
     const skip = (pageNumber - 1) * pageSize;
     const orders = await prisma.orders.findMany({
         skip,
         take: pageSize,
->>>>>>> Stashed changes
         select: {
             id: true,
             total: true,
@@ -46,14 +40,11 @@ export const getAllOrders = async (pageNumber: number) => {
         },
         orderBy: { created_at: 'desc' },
     });
-<<<<<<< Updated upstream
-=======
     const totalOrders = await prisma.orders.count();
     return {
         orders,
         totalPages: Math.ceil(totalOrders / pageSize),
     };
->>>>>>> Stashed changes
 };
 
 export const getOrderById = async (id: number) => {

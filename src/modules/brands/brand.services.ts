@@ -6,8 +6,8 @@ import { brandInput } from './brand.schema.js';
 
 
 
-export const getAllBrands = async () => {
-    return await brandRepositories.getAllBrands();
+export const getAllBrands = async (page: number) => {
+    return await brandRepositories.getAllBrands(page);
 }
 
 export const createBrand = async (data: brandInput, file: Express.Multer.File) => {
