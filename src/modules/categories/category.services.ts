@@ -4,8 +4,8 @@ import { categoryInput } from './category.schema.js';
 
 
 
-export const getAllCategories = async () => {
-    return await categoryRepository.getAllCategories();
+export const getAllCategories = async (page: number) => {
+    return await categoryRepository.getAllCategories(page);
 }
 
 export const createCategory = async (data: categoryInput) => {

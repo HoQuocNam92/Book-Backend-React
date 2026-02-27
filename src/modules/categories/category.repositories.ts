@@ -1,8 +1,15 @@
 import prisma from "../../utils/prisma.js"
 import { categoryInput } from "./category.schema.js";
 
-export const getAllCategories = async () => {
-    return await prisma.categories.findMany();
+const pags_size = 20;
+export const getAllCategories = async (page: number) => {
+    const categories = await prisma.categories.findMany({
+        skip: (page - 1) * pags_size,
+        take: pags_size
+    });
+    const totalPages = Math.ceil((await prisma.categories.count()) / pags_size);
+    return { categories, totalPages };
+
 }
 
 

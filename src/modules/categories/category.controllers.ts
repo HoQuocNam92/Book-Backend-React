@@ -8,8 +8,9 @@ import { Request, Response, NextFunction } from 'express';
 
 export const getAllCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await categoryService.getAllCategories();
-        res.status(200).json({ message: "Lấy danh mục thành công", data: categories });
+        const page = parseInt(req.query.page as string) || 1;
+        const { categories, totalPages } = await categoryService.getAllCategories(page);
+        res.status(200).json({ message: "Lấy danh mục thành công", data: categories, totalPages });
     } catch (error) {
         next(error);
     }
