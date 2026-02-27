@@ -14,8 +14,9 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
 
 export const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const orders = await orderServices.getAllOrders();
-        res.status(200).json({ message: 'Lấy danh sách đơn hàng thành công', data: orders });
+        const page = parseInt(req.query.page as string) || 1;
+        const { orders, totalPages } = await orderServices.getAllOrders(page);
+        res.status(200).json({ message: 'Lấy danh sách đơn hàng thành công', data: orders, totalPages });
     } catch (error) {
         next(error);
     }

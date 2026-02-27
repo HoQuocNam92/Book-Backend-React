@@ -1,7 +1,7 @@
 import * as orderRepo from './order.repositories.js';
 
-export const getAllOrders = async () => {
-    return await orderRepo.getAllOrders();
+export const getAllOrders = async (page: number) => {
+    return await orderRepo.getAllOrders(page);
 };
 
 export const getOrderById = async (id: number) => {
@@ -14,6 +14,7 @@ export const getOrderById = async (id: number) => {
 
 export const updateOrderStatus = async (id: number, status: string) => {
     const validStatuses = ['pending', 'confirmed', 'paid', 'shipping', 'completed', 'cancelled'];
+    console.log('Updating order status:', status);
     if (!validStatuses.includes(status.toLowerCase())) {
         throw { status: 400, message: 'Trạng thái không hợp lệ' };
     }

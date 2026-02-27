@@ -6,8 +6,9 @@ import { brandSchema } from './brand.schema.js';
 
 export const getAllBrands = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const brands = await brandServices.getAllBrands();
-        res.status(200).json(brands);
+        const page = parseInt(req.query.page as string) || 1;
+        const { brands, totalPages } = await brandServices.getAllBrands(page);
+        res.status(200).json({ brands, totalPages });
     } catch (error) {
         next(error);
     }

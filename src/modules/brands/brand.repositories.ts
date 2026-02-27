@@ -1,9 +1,19 @@
 import prisma from '../../utils/prisma.js';
 import { brandInput } from './brand.schema.js';
 import cloudinary from '../../utils/cloudinary.js'
+const pageSize = 10;
 
-export const getAllBrands = async () => {
-    return await prisma.brands.findMany();
+export const getAllBrands = async (page: number) => {
+    const skip = (page - 1) * pageSize;
+    const brands = await prisma.brands.findMany({
+        skip,
+        take: pageSize,
+    });
+    const totalPages = Math.ceil((await prisma.brands.count()) / pageSize);
+    return {
+        brands,
+        totalPages
+    };
 }
 
 
