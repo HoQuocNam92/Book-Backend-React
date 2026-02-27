@@ -10,6 +10,7 @@ import checkoutRoute from './checkout/checkout.routes.js';
 import addressesRoute from './addresses/address.routes.js';
 import webhookRoute from './webhook/webhook.routes.js';
 import overviewRoute from './overviews/overview.routes.js';
+import bannerRoute from './banners/banner.routes.js';
 import express from 'express';
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.use('/checkout', checkoutRoute);
 router.use('/addresses', addressesRoute);
 router.use('/telegram/webhook', webhookRoute);
 router.use('/overviews', overviewRoute);
+router.use('/banners', bannerRoute);
 
 export default router;
