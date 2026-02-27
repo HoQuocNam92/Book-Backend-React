@@ -1,20 +1,20 @@
 import { formatVND } from '../../utils/formatVND'
-const sendTelegramMessage = async (order: {
-    id: string;
-    customerName: string;
-    totalPrice: number;
-    phone: string;
-    address: string;
-    paymentMethod: string;
-    items: string[];
-}) => {
+const sendTelegramMessage = async (order: any, options = "sendOrders") => {
     const botToken = process.env.BOT_TOKEN;
     const chatId = process.env.CHAT_ID;
     if (!botToken || !chatId) {
         console.error('Bot token or chat ID is not defined in environment variables.');
         return;
     }
-    const message = `
+    let message = '';
+    if (options === "notiOrder") {
+        message = `
+        🔔 <b>THÔNG BÁO ĐƠN HÀNG</b>
+        📌 Trạng thái: ${order.status}
+        🆔 Mã đơn: ${order.id}
+    `;
+    } else {
+        message = `
 ✅ <b>ĐƠN HÀNG MỚI</b>
 
 🆔 Mã đơn: ${order.id}
@@ -24,8 +24,9 @@ const sendTelegramMessage = async (order: {
 📍 Địa chỉ: ${order.address}
 📦 Phương thức thanh toán: ${order.paymentMethod}
 📦 Danh sách sản phẩm: 
-${order.items.map(item => `  - Số lượng ${item[0]} -  ${item[2]} (${formatVND(Number(item[1]))})`).join('\n')}
+${order.items.map((item: any) => `  - Số lượng ${item[0]} -  ${item[2]} (${formatVND(Number(item[1]))})`).join('\n')}
   `;
+    }
     const url = 'https://api.telegram.org/bot' + botToken + '/sendMessage';
     const payload = {
         chat_id: chatId,
@@ -36,16 +37,16 @@ ${order.items.map(item => `  - Số lượng ${item[0]} -  ${item[2]} (${formatV
                 [
                     {
                         text: 'Xác nhận đơn hàng',
-                        url: `https://admin.alpha-books.com/orders/${order.id}`
+                        callback_data: `confirm_${order.id}`
                     },
                     {
                         text: 'Xem chi tiết',
-                        url: `https://admin.alpha-books.com/orders/${order.id}`
+                        callback_data: `view_${order.id}`
 
                     },
                     {
                         text: "Hủy đơn hàng",
-                        url: `https://admin.alpha-books.com/orders/${order.id}`
+                        callback_data: `cancel_${order.id}`
                     }
                 ]
             ]

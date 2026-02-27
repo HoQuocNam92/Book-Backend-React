@@ -19,6 +19,13 @@ const worker = new Worker("orderQueue", async (job) => {
             items: OrderItems.map((item: any) => [item.quantity, item.price, item.Books.title]),
         });
     }
+    if (job.name === "notiOrder") {
+        const { orderId, status } = job.data;
+        await sendTelegramMessage({
+            id: orderId,
+            status: status,
+        }, "notiOrder");
+    }
 }, {
     connection: {
         host: process.env.REDIS_HOST,
