@@ -27,8 +27,9 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await userServices.getAllUsers();
-        res.status(200).json({ message: 'Lấy danh sách người dùng thành công', data: users });
+        const page = parseInt(req.query.page as string) || 1;
+        const { users, totalPages } = await userServices.getAllUsers(page);
+        res.status(200).json({ message: 'Lấy danh sách người dùng thành công', data: users, totalPages });
     } catch (error) {
         next(error);
     }
