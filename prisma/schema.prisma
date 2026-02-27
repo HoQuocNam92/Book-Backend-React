@@ -35,6 +35,7 @@ model Banners {
   image_url   String      @db.NVarChar(255)
   link_url    String?     @db.NVarChar(255)
   category_id Int?
+  type        String?     @db.NVarChar(100)
   created_at  DateTime?   @default(now(), map: "DF__Banners__created__45BE5BA9") @db.DateTime
   Categories  Categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Banners_Categories")
 }
