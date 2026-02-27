@@ -8,7 +8,7 @@ import statsRoute from './stats/stats.routes.js';
 import cartRoute from './cart/cart.routes.js';
 import checkoutRoute from './checkout/checkout.routes.js';
 import addressesRoute from './addresses/address.routes.js';
-
+import webhookRoute from './webhook/webhook.routes.js';
 import express from 'express';
 const router = express.Router();
 
@@ -23,6 +23,6 @@ router.use('/stats', statsRoute);
 router.use('/cart', cartRoute);
 router.use('/checkout', checkoutRoute);
 router.use('/addresses', addressesRoute);
-
+router.use('/telegram/webhook', webhookRoute);
 
 export default router;

@@ -13,7 +13,7 @@ export const getOrderById = async (id: number) => {
 };
 
 export const updateOrderStatus = async (id: number, status: string) => {
-    const validStatuses = ['pending', 'paid', 'shipping', 'completed', 'cancelled'];
+    const validStatuses = ['pending', 'confirmed', 'paid', 'shipping', 'completed', 'cancelled'];
     if (!validStatuses.includes(status.toLowerCase())) {
         throw { status: 400, message: 'Trạng thái không hợp lệ' };
     }
