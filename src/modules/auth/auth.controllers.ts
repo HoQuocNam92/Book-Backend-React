@@ -180,6 +180,11 @@ export const signOut = async (
   req: AuthRequest,
   res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
     await authService.signOut(req.user?.id!);
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
