@@ -3,13 +3,14 @@ import jwt from 'jsonwebtoken';
 import 'dotenv';
 import { IverifyToken } from '../../interfaces/IverifyToken.js';
 import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
+import { refreshToken } from '../../modules/auth/auth.controllers';
 
 const authentication = (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.cookies?.accessToken;
+  const token = req.cookies?.accessToken
   try {
     if (!token) {
       throw new Error('UNAUTHORIZED');

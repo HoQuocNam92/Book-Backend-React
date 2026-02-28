@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { BannerSchema } from "./banner.schema";
 import * as bannerServices from './banner.services.js'
-export const getBannerAllOrByType = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllBanners = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const pageNumber = parseInt(req.query.page as string) || 1
         const type = (req.query.type as string) || 'all';
@@ -12,11 +12,29 @@ export const getBannerAllOrByType = async (req: Request, res: Response, next: Ne
     }
 }
 
+export const getBannersTypes = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const type = req.query.type as string
+        if (!type) {
+            return res.status(400).json({ message: 'Type query parameter is required' })
+        }
+        const types = await bannerServices.getBannersTypes(type)
+        res.json(types)
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 export const createBanner = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { link_url, image_url, type } = req.body
-        const validateInput = BannerSchema.parse({ link_url, image_url, type })
-        const banner = await bannerServices.createNewBanner(validateInput)
+        const file = req.file as Express.Multer.File
+        if (!file) {
+            return res.status(400).json({ message: 'Image file is required' })
+        }
+        const { link_url, type } = req.body
+        const validateInput = BannerSchema.parse({ link_url, type })
+        const banner = await bannerServices.createNewBanner(validateInput, file)
         res.json(banner)
     }
     catch (error) {
@@ -24,7 +42,21 @@ export const createBanner = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
-
+export const updateBannerById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const id = parseInt(req.params.id as string)
+        if (isNaN(id)) {
+            return res.status(400).json({ message: 'Invalid banner ID' })
+        }
+        const { link_url, type } = req.body
+        const validateInput = BannerSchema.parse({ link_url, type })
+        const banner = await bannerServices.updateBanner(id, validateInput)
+        res.json(banner)
+    }
+    catch (error) {
+        next(error)
+    }
+}
 export const deleteBannerById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const id = parseInt(req.params.id as string)
@@ -40,18 +72,3 @@ export const deleteBannerById = async (req: Request, res: Response, next: NextFu
 }
 
 
-export const updateBannerById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const id = parseInt(req.params.id as string)
-        if (isNaN(id)) {
-            return res.status(400).json({ message: 'Invalid banner ID' })
-        }
-        const { link_url, image_url, type } = req.body
-        const validateInput = BannerSchema.parse({ link_url, image_url, type })
-        const banner = await bannerServices.updateBanner(id, validateInput)
-        res.json(banner)
-    }
-    catch (error) {
-        next(error)
-    }
-}

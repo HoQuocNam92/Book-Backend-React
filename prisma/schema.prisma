@@ -31,13 +31,11 @@ model Authors {
 }
 
 model Banners {
-  id          Int         @id(map: "PK__Banners__3213E83FD7D6FF22") @default(autoincrement())
-  image_url   String      @db.NVarChar(255)
-  link_url    String?     @db.NVarChar(255)
-  category_id Int?
-  type        String?     @db.NVarChar(100)
-  created_at  DateTime?   @default(now(), map: "DF__Banners__created__45BE5BA9") @db.DateTime
-  Categories  Categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Banners_Categories")
+  id         Int      @id(map: "PK__Banners__3213E83FD7D6FF22") @default(autoincrement())
+  image_url  String   @db.NVarChar(255)
+  link_url   String   @db.NVarChar(255)
+  type       String   @db.NVarChar(100)
+  created_at DateTime @default(now(), map: "DF__Banners__created__45BE5BA9") @db.DateTime
 }
 
 model BookAttributes {
@@ -128,7 +126,6 @@ model Categories {
   name             String?      @db.NVarChar(255)
   slug             String?      @db.VarChar(255)
   parent_id        Int?
-  Banners          Banners[]
   Books            Books[]
   Categories       Categories?  @relation("CategoriesToCategories", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__Categorie__paren__3A4CA8FD")
   other_Categories Categories[] @relation("CategoriesToCategories")
