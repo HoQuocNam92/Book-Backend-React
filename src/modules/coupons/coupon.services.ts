@@ -22,7 +22,6 @@ export const updateCoupon = async (id: number, data: Prisma.CouponsUpdateInput) 
     if (!existingCoupon) {
         throw new Error('Coupon not found');
     }
-    // Check if code is being updated to an existing one
     if (data.code && data.code !== existingCoupon.code) {
         const checkCode = await couponRepository.getCouponByCode(data.code as string);
         if (checkCode) {

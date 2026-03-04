@@ -84,7 +84,7 @@ export const getRevenueStats = async (req: Request, res: Response, next: NextFun
             const s = (order.status || 'unknown').toLowerCase();
             statusCounts[s] = (statusCounts[s] || 0) + 1;
         }
-
+        console.log("Order status counts:", statusCounts);
         // Top 5 products by revenue for the year
         const topItems = await prisma.orderItems.groupBy({
             by: ['book_id'],

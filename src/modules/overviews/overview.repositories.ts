@@ -15,7 +15,7 @@ export const getRevenueByYear = async (year: number) => {
         WHERE created_at >= ${startDate} AND created_at <= ${endDate}
         GROUP BY MONTH(created_at)
     `
-
+    console.log('Revenue by month:', result)
     const revenueByMonth: { month: number, revenue: number }[] = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, revenue: 0 }))
 
     result.forEach(({ month, revenue }) => {
