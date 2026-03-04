@@ -31,30 +31,35 @@ export const getHomeProducts = async () => {
         },
     });
 
-    const bestSellerPromise = prisma.orderItems.groupBy({
+    const featuredPromise = prisma.orderItems.groupBy({
         by: ["book_id"],
         _sum: { quantity: true },
         orderBy: {
             _sum: { quantity: "desc" },
         },
         take,
+        where: {
+            Books: {
+                isFeatured: true,
+            }
+        }
     });
 
-    const [newBooks, discountBooks, bestSellerRaw] = await Promise.all([
+    const [newBooks, discountBooks, featuredBooks] = await Promise.all([
         newBooksPromise,
         discountBooksPromise,
-        bestSellerPromise,
+        featuredPromise,
     ]);
-    const bestSellerIds = bestSellerRaw
+    const featuredIds = featuredBooks
         .map((x: any) => x.book_id)
         .filter((id: any): id is number => id !== null);
 
 
-    let bestSellerBooks: any[] = [];
+    let featuredBooksList: any[] = [];
 
-    if (bestSellerIds.length > 0) {
+    if (featuredIds.length > 0) {
         const books = await prisma.books.findMany({
-            where: { id: { in: bestSellerIds } },
+            where: { id: { in: featuredIds } },
             include: {
                 BookImages: {
                     take: 1,
@@ -64,10 +69,10 @@ export const getHomeProducts = async () => {
         });
 
         const map = new Map<number, number>(
-            bestSellerRaw.map((x: any) => [x.book_id, x._sum.quantity ?? 0])
+            featuredBooks.map((x: any) => [x.book_id, x._sum.quantity ?? 0])
         );
 
-        bestSellerBooks = books.sort(
+        featuredBooksList = books.sort(
             (a: any, b: any) => (map.get(b.id) ?? 0) - (map.get(a.id) ?? 0)
         );
     }
@@ -83,7 +88,7 @@ export const getHomeProducts = async () => {
 
     return {
         newBooks: newBooks.map(formatBook),
-        bestSellerBooks: bestSellerBooks.map(formatBook),
+        featuredBooks: featuredBooksList.map(formatBook),
         discountBooks: discountBooks.map(formatBook),
     };
 };
