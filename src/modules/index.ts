@@ -14,6 +14,7 @@ import bannerRoute from './banners/banner.routes.js';
 import couponRoute from './coupons/coupon.routes.js';
 import revenueRoute from './revenues/revenue.routes.js';
 import relatedRoute from './related/related.routes.js';
+import reviewRoute from './reviews/review.routes.js';
 import express from 'express';
 const router = express.Router();
 
@@ -34,4 +35,5 @@ router.use('/banners', bannerRoute);
 router.use('/coupons', couponRoute);
 router.use('/revenues', revenueRoute);
 router.use('/related', relatedRoute);
+router.use('/reviews', reviewRoute);
 export default router;
