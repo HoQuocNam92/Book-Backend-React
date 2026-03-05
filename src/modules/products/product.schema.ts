@@ -19,7 +19,7 @@ export const productSchema = z.object({
 
     status: z.enum(["active", "draft", "archive"]).default("active"),
 
-
+    is_featured: z.string().transform((value) => value === "true").default(false),
 
 
     attri: z
@@ -41,4 +41,14 @@ export const deleteProductSchema = z.object({
 })
 
 export type deleteProductInput = z.infer<typeof deleteProductSchema>
+
+
+
+export const productQuickActionSchema = z.object({
+    status: z.enum(["active", "draft", "archive"]).optional(),
+    is_featured: z.boolean().optional(),
+})
+
+
+export type ProductQuickActionsInput = z.infer<typeof productQuickActionSchema>
 

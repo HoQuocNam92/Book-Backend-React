@@ -1,5 +1,5 @@
 import prisma from "../../utils/prisma.js";
-import { deleteProductInput, productInput } from "./product.schema.js";
+import { deleteProductInput, productInput, ProductQuickActionsInput } from "./product.schema.js";
 
 import cloudinary from '../../utils/cloudinary.js'
 
@@ -14,6 +14,9 @@ export const getHomeProducts = async () => {
                 take: 1,
                 select: { url: true },
             },
+        },
+        where: {
+            status: "active"
         }
     });
 
@@ -21,6 +24,8 @@ export const getHomeProducts = async () => {
         take,
         where: {
             discount_percent: { gt: 0 },
+            sale_price: { gt: 0 },
+            status: "active"
         },
         orderBy: { discount_percent: "desc" },
         include: {
@@ -31,18 +36,21 @@ export const getHomeProducts = async () => {
         },
     });
 
-    const featuredPromise = prisma.orderItems.groupBy({
-        by: ["book_id"],
-        _sum: { quantity: true },
+    const featuredPromise = prisma.books.findMany({
         orderBy: {
-            _sum: { quantity: "desc" },
+            created_at: "desc",
         },
         take,
         where: {
-            Books: {
-                isFeatured: true,
+            isFeatured: true,
+            status: "active"
+        },
+        include: {
+            BookImages: {
+                take: 1,
+                select: { url: true },
             }
-        }
+        },
     });
 
     const [newBooks, discountBooks, featuredBooks] = await Promise.all([
@@ -50,32 +58,8 @@ export const getHomeProducts = async () => {
         discountBooksPromise,
         featuredPromise,
     ]);
-    const featuredIds = featuredBooks
-        .map((x: any) => x.book_id)
-        .filter((id: any): id is number => id !== null);
 
 
-    let featuredBooksList: any[] = [];
-
-    if (featuredIds.length > 0) {
-        const books = await prisma.books.findMany({
-            where: { id: { in: featuredIds } },
-            include: {
-                BookImages: {
-                    take: 1,
-                    select: { url: true },
-                }
-            },
-        });
-
-        const map = new Map<number, number>(
-            featuredBooks.map((x: any) => [x.book_id, x._sum.quantity ?? 0])
-        );
-
-        featuredBooksList = books.sort(
-            (a: any, b: any) => (map.get(b.id) ?? 0) - (map.get(a.id) ?? 0)
-        );
-    }
 
     const formatBook = (p: any) => ({
         ...p,
@@ -88,7 +72,7 @@ export const getHomeProducts = async () => {
 
     return {
         newBooks: newBooks.map(formatBook),
-        featuredBooks: featuredBooksList.map(formatBook),
+        featuredBooks: featuredBooks.map(formatBook),
         discountBooks: discountBooks.map(formatBook),
     };
 };
@@ -98,73 +82,25 @@ export const getHomeProducts = async () => {
 export const getProductByCategory = async (category_slug: string | undefined, pageNumber: number,) => {
     const pageSize = 30
     const skip = (pageNumber - 1) * pageSize;
-
-    if (category_slug === "all") {
-        const totalItems = await prisma.books.count();
-        const products = await prisma.books.findMany({
-            skip,
-            take: pageSize,
-            orderBy: { id: "desc" },
-            select: {
-                id: true,
-                title: true,
-                sale_price: true,
-                price: true,
-                status: true,
-                slug: true,
-                discount_percent: true,
-                stock: true,
-                BookImages: {
-                    take: 1,
-                    select: { url: true },
-                },
-                Categories: {
-                    select: {
-                        name: true,
-                        slug: true,
-                    },
-
-                }
-            },
+    let whereConditions = {};
+    let parentCategory;
+    const slug = category_slug === "all" ? undefined : category_slug;
+    if (slug) {
+        parentCategory = await prisma.categories.findFirst({
+            where: { slug },
+            select: { id: true },
         });
-        const totalPages = Math.ceil(totalItems / pageSize);
-        return {
-            data: products.map((p: any) => ({
-                ...p,
-                BookImages: p.BookImages[0]?.url || null,
-                price: Number(p.price),
-                sale_price: Number(p.sale_price),
-                discount_percent: Number(p.discount_percent),
-            })),
-            pagination: {
-                page: pageNumber,
-                pageSize,
-                totalItems,
-                totalPages,
+        whereConditions = {
+            category_id: {
+                in: (
+                    await prisma.categories.findMany({
+                        where: { parent_id: parentCategory?.id },
+                        select: { id: true },
+                    })
+                ).map((c: any) => c.id),
             },
-            category: {
-                name: products[0].Categories?.name,
-                slug: products[0].Categories?.slug,
-            }
         };
     }
-    const slug = category_slug
-
-    const parentCategory = await prisma.categories.findFirst({
-        where: { slug },
-        select: { id: true },
-    });
-
-    const whereConditions = {
-        category_id: {
-            in: (
-                await prisma.categories.findMany({
-                    where: { parent_id: parentCategory?.id },
-                    select: { id: true },
-                })
-            ).map((c: any) => c.id),
-        },
-    };
 
     const totalItems = await prisma.books.count({
         where: whereConditions
@@ -189,11 +125,20 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
             },
             Categories: {
                 select: {
+                    id: true,
                     name: true,
                     slug: true,
                 },
 
-            }
+            },
+            Brands: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                }
+            },
+            isFeatured: true,
         },
         where: whereConditions,
     });
@@ -215,8 +160,8 @@ export const getProductByCategory = async (category_slug: string | undefined, pa
             totalPages,
         },
         category: {
-            name: products[0].Categories?.name,
-            slug: products[0].Categories?.slug,
+            name: products[0]?.Categories?.name || null,
+            slug: products[0]?.Categories?.slug || null,
         }
 
     };
@@ -251,6 +196,7 @@ export const createProduct = async (files: Express.Multer.File[], data: productI
                     discount_percent: data.discount_percent,
                     description: data.description,
                     sale_price: data.sale_price,
+                    status: data.status,
                 },
             });
 
@@ -334,15 +280,19 @@ export const getProductById = async (id: number) => {
 export const getProductBySlug = async (slug: string) => {
     const product = await prisma.books.findFirst({
         where: { slug },
-        include: {
+        select: {
+            title: true,
+            description: true,
+            price: true,
+            status: true,
+            stock: true,
+            slug: true,
+            sale_price: true,
+            discount_percent: true,
+            isFeatured: true,
             BookImages: true,
             Categories: true,
             Brands: true,
-            BookAuthors: {
-                include: {
-                    Authors: true,
-                }
-            },
             BookAttributes: true,
             Reviews: {
                 include: {
@@ -353,38 +303,45 @@ export const getProductBySlug = async (slug: string) => {
                 orderBy: { create_at: 'desc' },
                 take: 20,
             },
-            BookPromotions: true
+            BookPromotions: true,
+            BookAuthors: {
+                include: {
+                    Authors: true,
+                },
+
+            }
         }
     });
 
     if (!product) return null;
 
-    const relatedBooks = await prisma.books.findMany({
-        where: {
-            category_id: product.category_id,
-            id: { not: product.id },
-        },
-        take: 6,
-        include: {
-            BookImages: {
-                take: 1,
-                select: { url: true },
-            }
-        },
-    });
+    // const relatedBooks = await prisma.books.findMany({
+    //     where: {
+    //         category_id: product.category_id,
+    //         id: { not: product.id },
+    //     },
+    //     take: 6,
+    //     include: {
+    //         BookImages: {
+    //             take: 1,
+    //             select: { url: true },
+    //         }
+    //     },
 
+    // });
+    //   relatedBooks: relatedBooks.map((b: any) => ({
+    //             ...b,
+    //             BookImages: b.BookImages[0]?.url,
+    //             price: Number(b.price),
+    //             sale_price: b.sale_price ? Number(b.sale_price) : null,
+    //             discount_percent: b.discount_percent || 0,
+    //         })),
     return {
         ...product,
         price: Number(product.price),
         sale_price: product.sale_price ? Number(product.sale_price) : null,
         discount_percent: product.discount_percent || 0,
-        relatedBooks: relatedBooks.map((b: any) => ({
-            ...b,
-            BookImages: b.BookImages[0]?.url,
-            price: Number(b.price),
-            sale_price: b.sale_price ? Number(b.sale_price) : null,
-            discount_percent: b.discount_percent || 0,
-        })),
+        BookImages: product.BookImages
     };
 }
 
@@ -398,15 +355,19 @@ export const getProductImageById = async (id: number) => {
 
 
 export const updateProduct = async (files: Express.Multer.File[], id: number, data: productInput) => {
+    console.log("Check data in repo", data)
     const uploadedAssets: { secure_url: string; public_id: string }[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-        const b64 = Buffer.from(files[i].buffer).toString("base64");
-        const dataURI = `data:${files[i].mimetype};base64,${b64}`;
-        const uploaded = await cloudinary.uploader.upload(dataURI, { folder: "Books" });
-        uploadedAssets.push({ secure_url: uploaded.secure_url, public_id: uploaded.public_id });
+    if (files && files.length > 0) {
+
+        for (let i = 0; i < files.length; i++) {
+            const b64 = Buffer.from(files[i].buffer).toString("base64");
+            const dataURI = `data:${files[i].mimetype};base64,${b64}`;
+            const uploaded = await cloudinary.uploader.upload(dataURI, { folder: "Books" });
+            uploadedAssets.push({ secure_url: uploaded.secure_url, public_id: uploaded.public_id });
 
 
+        }
     }
     try {
         const books = await prisma.$transaction(async (tx: any) => {
@@ -421,6 +382,8 @@ export const updateProduct = async (files: Express.Multer.File[], id: number, da
                     discount_percent: data.discount_percent,
                     description: data.description,
                     sale_price: data.sale_price,
+                    isFeatured: data.is_featured,
+                    status: data.status,
                 },
                 where: {
                     id
@@ -469,4 +432,30 @@ export const updateProduct = async (files: Express.Multer.File[], id: number, da
         )
         throw error
     }
+}
+
+
+export const updateProductQuickActions = async (id: number, data: ProductQuickActionsInput) => {
+    const updatedData: any = {};
+    if (data.is_featured !== undefined) {
+        updatedData.isFeatured = data.is_featured;
+    }
+    if (data.status !== undefined) {
+        updatedData.status = data.status;
+    }
+    return await prisma.books.update({
+        where: { id },
+        data: updatedData,
+    })
+
+}
+
+
+export const getCategoryBySlug = async (slug: string) => {
+    return await prisma.categories.findFirst({
+        where: { slug },
+        select: {
+            id: true,
+        }
+    })
 }

@@ -1,7 +1,7 @@
 import prisma from '../../utils/prisma.js';
 import { brandInput } from './brand.schema.js';
 import cloudinary from '../../utils/cloudinary.js'
-const pageSize = 10;
+const pageSize = 30;
 
 export const getAllBrands = async (page: number) => {
     const skip = (page - 1) * pageSize;

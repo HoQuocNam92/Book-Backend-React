@@ -32,14 +32,10 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProduct = exports.deleteProduct = exports.createProduct = exports.getProductByCategory = exports.getProductBySlug = exports.getProducts = void 0;
+exports.updateProductQuickActions = exports.updateProduct = exports.deleteProduct = exports.createProduct = exports.getProductByCategory = exports.getProductBySlug = exports.getProducts = void 0;
 const productService = __importStar(require("./product.services.js"));
 const product_schema_js_1 = require("./product.schema.js");
-const redis_js_1 = __importDefault(require("../../utils/redis.js"));
 const getProducts = async (req, res, next) => {
     try {
         const data = await productService.getHomeProducts();
@@ -67,14 +63,8 @@ exports.getProductBySlug = getProductBySlug;
 const getProductByCategory = async (req, res, next) => {
     try {
         const pageNumber = Number(req.query?.page) || 1;
-        const cacheKey = `products:${req.params?.category_slug || "all"}:page:${pageNumber}`;
-        const cachedData = await redis_js_1.default.get(cacheKey);
-        if (cachedData) {
-            return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công (cached)", ...JSON.parse(cachedData) });
-        }
         const category_slug = req.params?.category_slug || "";
         const { data, pagination, category } = await productService.getProductByCategory(category_slug, pageNumber);
-        await redis_js_1.default.setEx(cacheKey, 3600, JSON.stringify({ data, pagination, category }));
         return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công", data, pagination, category });
     }
     catch (error) {
@@ -113,9 +103,6 @@ const updateProduct = async (req, res, next) => {
         const id = Number(req.params?.id);
         const data = product_schema_js_1.productSchema.parse(req.body);
         const files = req.files;
-        if (!files || files.length === 0) {
-            return res.status(403).json({ message: "Vui lòng thêm ảnh" });
-        }
         const book = await productService.updateProduct(files, id, data);
         return res.status(200).json({ message: "Cập nhật sản phẩm thành công", book });
     }
@@ -124,3 +111,16 @@ const updateProduct = async (req, res, next) => {
     }
 };
 exports.updateProduct = updateProduct;
+const updateProductQuickActions = async (req, res, next) => {
+    try {
+        const id = Number(req.params?.id);
+        const data = req.body;
+        const validatedData = product_schema_js_1.productQuickActionSchema.parse(data);
+        const book = await productService.updateProductQuickActions(id, validatedData);
+        return res.status(200).json({ message: "Cập nhật sản phẩm thành công", book });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.updateProductQuickActions = updateProductQuickActions;

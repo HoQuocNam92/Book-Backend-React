@@ -3,9 +3,8 @@
 
 import { NextFunction, Request, Response } from 'express'
 import * as productService from './product.services.js'
-import { deleteProductSchema, productSchema } from './product.schema.js';
+import { deleteProductSchema, productQuickActionSchema, productSchema } from './product.schema.js';
 
-import redisClient from '../../utils/redis.js';
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -32,14 +31,10 @@ export const getProductBySlug = async (req: Request, res: Response, next: NextFu
 export const getProductByCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const pageNumber = Number(req.query?.page) || 1;
-        const cacheKey = `products:${req.params?.category_slug || "all"}:page:${pageNumber}`;
-        const cachedData = await redisClient.get(cacheKey);
-        if (cachedData) {
-            return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công (cached)", ...JSON.parse(cachedData) });
-        }
+
         const category_slug = req.params?.category_slug || "";
+        console.log("category_slug", category_slug)
         const { data, pagination, category } = await productService.getProductByCategory(category_slug as string, pageNumber);
-        await redisClient.setEx(cacheKey, 3600, JSON.stringify({ data, pagination, category }));
         return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công", data, pagination, category });
     } catch (error) {
         next(error)
@@ -83,10 +78,6 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         const id = Number(req.params?.id);
         const data = productSchema.parse(req.body)
         const files = req.files as Express.Multer.File[];
-        if (!files || files.length === 0) {
-            return res.status(403).json({ message: "Vui lòng thêm ảnh" });
-        }
-
         const book = await productService.updateProduct(files, id, data);
         return res.status(200).json({ message: "Cập nhật sản phẩm thành công", book });
     } catch (error) {
@@ -94,3 +85,16 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     }
 }
 
+export const updateProductQuickActions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const id = Number(req.params?.id);
+        const data = req.body
+        const validatedData = productQuickActionSchema.parse(data)
+
+        const book = await productService.updateProductQuickActions(id, validatedData);
+        return res.status(200).json({ message: "Cập nhật sản phẩm thành công", book });
+    }
+    catch (error) {
+        next(error)
+    }
+}

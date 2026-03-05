@@ -6,8 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateProfile = exports.getProfile = exports.countUsers = exports.deleteUser = exports.getUserById = exports.getAllUsers = void 0;
 const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
 const cloudinary_js_1 = __importDefault(require("../../utils/cloudinary.js"));
-const getAllUsers = async () => {
-    return await prisma_js_1.default.users.findMany({
+const page_size = 20;
+const getAllUsers = async (page) => {
+    const skip = (page - 1) * page_size;
+    const user = await prisma_js_1.default.users.findMany({
+        skip,
+        take: page_size,
         select: {
             id: true,
             name: true,
@@ -34,6 +38,11 @@ const getAllUsers = async () => {
         },
         orderBy: { created_at: 'desc' },
     });
+    const totalPages = Math.ceil(await prisma_js_1.default.users.count() / page_size);
+    return {
+        users: user,
+        totalPages,
+    };
 };
 exports.getAllUsers = getAllUsers;
 const getUserById = async (id) => {

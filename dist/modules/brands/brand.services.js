@@ -39,8 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBrand = exports.updateBrand = exports.createBrand = exports.getAllBrands = void 0;
 const slugify_1 = __importDefault(require("slugify"));
 const brandRepositories = __importStar(require("./brand.repositories.js"));
-const getAllBrands = async () => {
-    return await brandRepositories.getAllBrands();
+const getAllBrands = async (page) => {
+    return await brandRepositories.getAllBrands(page);
 };
 exports.getAllBrands = getAllBrands;
 const createBrand = async (data, file) => {

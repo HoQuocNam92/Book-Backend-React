@@ -35,8 +35,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteOrder = exports.getMyOrders = exports.updateOrderStatus = exports.getOrderById = exports.getAllOrders = void 0;
 const orderRepo = __importStar(require("./order.repositories.js"));
-const getAllOrders = async () => {
-    return await orderRepo.getAllOrders();
+const getAllOrders = async (page) => {
+    return await orderRepo.getAllOrders(page);
 };
 exports.getAllOrders = getAllOrders;
 const getOrderById = async (id) => {
@@ -48,7 +48,8 @@ const getOrderById = async (id) => {
 };
 exports.getOrderById = getOrderById;
 const updateOrderStatus = async (id, status) => {
-    const validStatuses = ['pending', 'paid', 'shipping', 'completed', 'cancelled'];
+    const validStatuses = ['pending', 'confirmed', 'paid', 'shipping', 'completed', 'cancelled'];
+    console.log('Updating order status:', status);
     if (!validStatuses.includes(status.toLowerCase())) {
         throw { status: 400, message: 'Trạng thái không hợp lệ' };
     }

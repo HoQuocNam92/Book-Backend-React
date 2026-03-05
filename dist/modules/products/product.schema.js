@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProductSchema = exports.productSchema = void 0;
+exports.productQuickActionSchema = exports.deleteProductSchema = exports.productSchema = void 0;
 const zod_1 = require("zod");
 exports.productSchema = zod_1.z.object({
     title: zod_1.z.string().min(1, "Tên sản phẩm không được để trống"),
@@ -14,6 +14,7 @@ exports.productSchema = zod_1.z.object({
     category_id: zod_1.z.coerce.number().int("category_id phải là số nguyên"),
     discount_percent: zod_1.z.coerce.number().min(0).max(100).default(0),
     status: zod_1.z.enum(["active", "draft", "archive"]).default("active"),
+    is_featured: zod_1.z.string().transform((value) => value === "true").default(false),
     attri: zod_1.z
         .array(zod_1.z.object({
         key: zod_1.z.string().min(1, "Key không được trống"),
@@ -23,4 +24,8 @@ exports.productSchema = zod_1.z.object({
 });
 exports.deleteProductSchema = zod_1.z.object({
     id: zod_1.z.number().int(),
+});
+exports.productQuickActionSchema = zod_1.z.object({
+    status: zod_1.z.enum(["active", "draft", "archive"]).optional(),
+    is_featured: zod_1.z.boolean().optional(),
 });

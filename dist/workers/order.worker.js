@@ -20,6 +20,13 @@ const worker = new bullmq_1.Worker("orderQueue", async (job) => {
             items: OrderItems.map((item) => [item.quantity, item.price, item.Books.title]),
         });
     }
+    if (job.name === "notiOrder") {
+        const { orderId, status } = job.data;
+        await (0, telegram_bot_js_1.default)({
+            id: orderId,
+            status: status,
+        }, "notiOrder");
+    }
 }, {
     connection: {
         host: process.env.REDIS_HOST,

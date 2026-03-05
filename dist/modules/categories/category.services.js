@@ -39,8 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategory = exports.updateCategory = exports.createCategory = exports.getAllCategories = void 0;
 const slugify_1 = __importDefault(require("slugify"));
 const categoryRepository = __importStar(require("./category.repositories.js"));
-const getAllCategories = async () => {
-    return await categoryRepository.getAllCategories();
+const getAllCategories = async (page) => {
+    return await categoryRepository.getAllCategories(page);
 };
 exports.getAllCategories = getAllCategories;
 const createCategory = async (data) => {
