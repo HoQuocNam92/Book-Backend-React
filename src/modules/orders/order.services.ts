@@ -25,8 +25,8 @@ export const updateOrderStatus = async (id: number, status: string) => {
     return await orderRepo.updateOrderStatus(id, status);
 };
 
-export const getMyOrders = async (userId: number) => {
-    return await orderRepo.getOrdersByUserId(userId);
+export const getMyOrders = async (userId: number, page: number) => {
+    return await orderRepo.getOrdersByUserId(userId, page);
 };
 
 export const deleteOrder = async (id: number) => {
