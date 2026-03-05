@@ -281,6 +281,7 @@ export const getProductBySlug = async (slug: string) => {
     const product = await prisma.books.findFirst({
         where: { slug },
         select: {
+            id: true,
             title: true,
             description: true,
             price: true,
