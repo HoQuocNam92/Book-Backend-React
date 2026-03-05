@@ -5,8 +5,9 @@ import * as orderServices from './order.services.js';
 export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const userId = req.user!.id;
-        const orders = await orderServices.getMyOrders(userId);
-        res.status(200).json({ message: 'Lấy đơn hàng của bạn thành công', data: orders });
+        const page = parseInt(req.query.page as string) || 1;
+        const { orders, totalPages } = await orderServices.getMyOrders(userId, page);
+        res.status(200).json({ message: 'Lấy đơn hàng của bạn thành công', data: orders, totalPages });
     } catch (error) {
         next(error);
     }

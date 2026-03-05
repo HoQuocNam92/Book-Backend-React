@@ -84,8 +84,12 @@ export const countOrders = async () => {
     return await prisma.orders.count();
 };
 
-export const getOrdersByUserId = async (userId: number) => {
-    return await prisma.orders.findMany({
+export const getOrdersByUserId = async (userId: number, pageNumber: number) => {
+    const pageSize = 5;
+    const skip = (pageNumber - 1) * pageSize;
+    const orders = await prisma.orders.findMany({
+        take: pageSize,
+        skip,
         where: { user_id: userId },
         select: {
             id: true,
@@ -123,6 +127,12 @@ export const getOrdersByUserId = async (userId: number) => {
         },
         orderBy: { created_at: 'desc' },
     });
+    const totalOrders = await prisma.orders.count({ where: { user_id: userId } });
+    const totalPages = Math.ceil(totalOrders / pageSize);
+    return {
+        orders,
+        totalPages,
+    }
 };
 
 export const getRecentOrders = async (limit = 10) => {
