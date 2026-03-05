@@ -39,11 +39,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const productController = __importStar(require("./product.controllers.js"));
 const upload_js_1 = require("../../utils/upload.js");
+const redis_js_1 = __importDefault(require("../../utils/redis.js"));
 const router = express_1.default.Router();
 router.get('/', productController.getProducts);
 router.get('/detail/:slug', productController.getProductBySlug);
 router.get('/:category_slug', productController.getProductByCategory);
 router.post('/', upload_js_1.upload.array("images", 10), productController.createProduct);
+router.put('/quickActions/:id', productController.updateProductQuickActions);
 router.put('/:id', productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
+router.post('/del', async (req, res) => {
+    const keys = await redis_js_1.default.keys('products:*');
+    if (keys.length > 0) {
+        await redis_js_1.default.del(keys);
+    }
+    return res.status(200).json({ message: 'Cache cleared successfully' });
+});
 exports.default = router;

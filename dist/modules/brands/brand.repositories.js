@@ -6,8 +6,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBrandById = exports.deleteBrand = exports.updateBrand = exports.createBrand = exports.getAllBrands = void 0;
 const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
 const cloudinary_js_1 = __importDefault(require("../../utils/cloudinary.js"));
-const getAllBrands = async () => {
-    return await prisma_js_1.default.brands.findMany();
+const pageSize = 10;
+const getAllBrands = async (page) => {
+    const skip = (page - 1) * pageSize;
+    const brands = await prisma_js_1.default.brands.findMany({
+        skip,
+        take: pageSize,
+    });
+    const totalPages = Math.ceil((await prisma_js_1.default.brands.count()) / pageSize);
+    return {
+        brands,
+        totalPages
+    };
 };
 exports.getAllBrands = getAllBrands;
 const createBrand = async (data, file) => {

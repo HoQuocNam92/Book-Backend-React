@@ -48,8 +48,9 @@ const getMyOrders = async (req, res, next) => {
 exports.getMyOrders = getMyOrders;
 const getAllOrders = async (req, res, next) => {
     try {
-        const orders = await orderServices.getAllOrders();
-        res.status(200).json({ message: 'Lấy danh sách đơn hàng thành công', data: orders });
+        const page = parseInt(req.query.page) || 1;
+        const { orders, totalPages } = await orderServices.getAllOrders(page);
+        res.status(200).json({ message: 'Lấy danh sách đơn hàng thành công', data: orders, totalPages });
     }
     catch (error) {
         next(error);

@@ -5,8 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCategoryById = exports.deleteCategory = exports.updateCategory = exports.createCategory = exports.getAllCategories = void 0;
 const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
-const getAllCategories = async () => {
-    return await prisma_js_1.default.categories.findMany();
+const pags_size = 20;
+const getAllCategories = async (page) => {
+    const categories = await prisma_js_1.default.categories.findMany({
+        skip: (page - 1) * pags_size,
+        take: pags_size
+    });
+    const totalPages = Math.ceil((await prisma_js_1.default.categories.count()) / pags_size);
+    return { categories, totalPages };
 };
 exports.getAllCategories = getAllCategories;
 const createCategory = async (data) => {

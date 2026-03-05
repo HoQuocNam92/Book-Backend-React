@@ -38,8 +38,9 @@ const brandServices = __importStar(require("./brand.services.js"));
 const brand_schema_js_1 = require("./brand.schema.js");
 const getAllBrands = async (req, res, next) => {
     try {
-        const brands = await brandServices.getAllBrands();
-        res.status(200).json(brands);
+        const page = parseInt(req.query.page) || 1;
+        const { brands, totalPages } = await brandServices.getAllBrands(page);
+        res.status(200).json({ message: "Lấy danh sách thương hiệu thành công", data: brands, totalPages });
     }
     catch (error) {
         next(error);

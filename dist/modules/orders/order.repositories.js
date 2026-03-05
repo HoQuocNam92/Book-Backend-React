@@ -5,8 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRecentOrders = exports.getOrdersByUserId = exports.countOrders = exports.deleteOrder = exports.updateOrderStatus = exports.getOrderById = exports.getAllOrders = void 0;
 const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
-const getAllOrders = async () => {
-    return await prisma_js_1.default.orders.findMany({
+const pageSize = 30;
+const getAllOrders = async (pageNumber) => {
+    const skip = (pageNumber - 1) * pageSize;
+    const orders = await prisma_js_1.default.orders.findMany({
+        skip,
+        take: pageSize,
         select: {
             id: true,
             total: true,
@@ -42,6 +46,11 @@ const getAllOrders = async () => {
         },
         orderBy: { created_at: 'desc' },
     });
+    const totalOrders = await prisma_js_1.default.orders.count();
+    return {
+        orders,
+        totalPages: Math.ceil(totalOrders / pageSize),
+    };
 };
 exports.getAllOrders = getAllOrders;
 const getOrderById = async (id) => {

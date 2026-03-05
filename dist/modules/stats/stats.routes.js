@@ -40,4 +40,5 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 const statsControllers = __importStar(require("./stats.controllers.js"));
 router.get('/overview', statsControllers.getOverviewStats);
+router.get('/revenue', statsControllers.getRevenueStats);
 exports.default = router;

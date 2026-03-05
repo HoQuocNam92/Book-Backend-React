@@ -185,6 +185,11 @@ const resetPassord = async (req, res, next) => {
 exports.resetPassord = resetPassord;
 const signOut = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({
+                message: 'Unauthorized',
+            });
+        }
         await authService.signOut(req.user?.id);
         res.clearCookie('accessToken');
         res.clearCookie('refreshToken');

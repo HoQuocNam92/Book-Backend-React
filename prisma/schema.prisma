@@ -170,13 +170,14 @@ model NewsImages {
 }
 
 model OrderItems {
-  id       Int      @id(map: "PK__OrderIte__3213E83F757D2546") @default(autoincrement())
-  order_id Int?
-  book_id  Int?
-  quantity Int?
-  price    Decimal? @db.Decimal(12, 2)
-  Books    Books?   @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__OrderItem__book___6A30C649")
-  Orders   Orders?  @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__OrderItem__order__693CA210")
+  id         Int       @id(map: "PK__OrderIte__3213E83F757D2546") @default(autoincrement())
+  order_id   Int
+  book_id    Int
+  quantity   Int
+  price      Decimal   @db.Decimal(12, 2)
+  created_at DateTime? @default(now(), map: "DF_OrderItems_created_at") @db.Date
+  Books      Books     @relation(fields: [book_id], references: [id], onUpdate: NoAction, map: "FK__OrderItem__book___6A30C649")
+  Orders     Orders    @relation(fields: [order_id], references: [id], onUpdate: NoAction, map: "FK__OrderItem__order__693CA210")
 }
 
 model Orders {

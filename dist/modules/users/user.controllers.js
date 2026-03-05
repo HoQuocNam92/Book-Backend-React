@@ -62,8 +62,9 @@ const updateProfile = async (req, res, next) => {
 exports.updateProfile = updateProfile;
 const getAllUsers = async (req, res, next) => {
     try {
-        const users = await userServices.getAllUsers();
-        res.status(200).json({ message: 'Lấy danh sách người dùng thành công', data: users });
+        const page = parseInt(req.query.page) || 1;
+        const { users, totalPages } = await userServices.getAllUsers(page);
+        res.status(200).json({ message: 'Lấy danh sách người dùng thành công', data: users, totalPages });
     }
     catch (error) {
         next(error);

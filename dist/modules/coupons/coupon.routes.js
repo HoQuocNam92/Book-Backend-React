@@ -32,38 +32,16 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfile = exports.getProfile = exports.deleteUser = exports.getUserById = exports.getAllUsers = void 0;
-const userRepo = __importStar(require("./user.repositories.js"));
-const getAllUsers = async (page) => {
-    return await userRepo.getAllUsers(page);
-};
-exports.getAllUsers = getAllUsers;
-const getUserById = async (id) => {
-    const user = await userRepo.getUserById(id);
-    if (!user) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return user;
-};
-exports.getUserById = getUserById;
-const deleteUser = async (id) => {
-    const user = await userRepo.getUserById(id);
-    if (!user) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return await userRepo.deleteUser(id);
-};
-exports.deleteUser = deleteUser;
-const getProfile = async (userId) => {
-    const profile = await userRepo.getProfile(userId);
-    if (!profile) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return profile;
-};
-exports.getProfile = getProfile;
-const updateProfile = async (userId, data, file) => {
-    return await userRepo.updateProfile(userId, data, file);
-};
-exports.updateProfile = updateProfile;
+const express_1 = __importDefault(require("express"));
+const couponController = __importStar(require("./coupon.controllers"));
+const router = express_1.default.Router();
+router.get('/', couponController.getAllCoupons);
+router.get('/:id', couponController.getCouponById);
+router.post('/', couponController.createCoupon);
+router.put('/:id', couponController.updateCoupon);
+router.delete('/:id', couponController.deleteCoupon);
+exports.default = router;

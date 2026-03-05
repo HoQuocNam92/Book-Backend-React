@@ -33,37 +33,21 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfile = exports.getProfile = exports.deleteUser = exports.getUserById = exports.getAllUsers = void 0;
-const userRepo = __importStar(require("./user.repositories.js"));
-const getAllUsers = async (page) => {
-    return await userRepo.getAllUsers(page);
+exports.getRevenueAll = exports.getRevenueWeek = exports.getMonthlyRevenue = exports.getYearlyRevenue = void 0;
+const revenueRepo = __importStar(require("./revenue.repositories"));
+const getYearlyRevenue = async (year) => {
+    return await revenueRepo.getYearlyRevenue(year);
 };
-exports.getAllUsers = getAllUsers;
-const getUserById = async (id) => {
-    const user = await userRepo.getUserById(id);
-    if (!user) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return user;
+exports.getYearlyRevenue = getYearlyRevenue;
+const getMonthlyRevenue = async (year, month) => {
+    return await revenueRepo.getMonthlyRevenue(year, month);
 };
-exports.getUserById = getUserById;
-const deleteUser = async (id) => {
-    const user = await userRepo.getUserById(id);
-    if (!user) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return await userRepo.deleteUser(id);
+exports.getMonthlyRevenue = getMonthlyRevenue;
+const getRevenueWeek = async (week, year) => {
+    return await revenueRepo.getRevenueWeek(week, year);
 };
-exports.deleteUser = deleteUser;
-const getProfile = async (userId) => {
-    const profile = await userRepo.getProfile(userId);
-    if (!profile) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return profile;
+exports.getRevenueWeek = getRevenueWeek;
+const getRevenueAll = async (year) => {
+    return await revenueRepo.getRevenueAll(year);
 };
-exports.getProfile = getProfile;
-const updateProfile = async (userId, data, file) => {
-    return await userRepo.updateProfile(userId, data, file);
-};
-exports.updateProfile = updateProfile;
+exports.getRevenueAll = getRevenueAll;

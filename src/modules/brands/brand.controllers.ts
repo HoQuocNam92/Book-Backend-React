@@ -8,7 +8,7 @@ export const getAllBrands = async (req: Request, res: Response, next: NextFuncti
     try {
         const page = parseInt(req.query.page as string) || 1;
         const { brands, totalPages } = await brandServices.getAllBrands(page);
-        res.status(200).json({ brands, totalPages });
+        res.status(200).json({ message: "Lấy danh sách thương hiệu thành công", data: brands, totalPages });
     } catch (error) {
         next(error);
     }

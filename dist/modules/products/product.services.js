@@ -36,12 +36,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProduct = exports.deleteProduct = exports.createProduct = exports.getProductBySlug = exports.getProductByCategory = exports.getHomeProducts = void 0;
+exports.updateProductQuickActions = exports.updateProduct = exports.deleteProduct = exports.createProduct = exports.getProductBySlug = exports.getProductByCategory = exports.getHomeProducts = void 0;
 const slugify_1 = __importDefault(require("slugify"));
 const productRepo = __importStar(require("./product.repositories.js"));
+const redis_js_1 = __importDefault(require("../../utils/redis.js"));
 const getHomeProducts = async () => await productRepo.getHomeProducts();
 exports.getHomeProducts = getHomeProducts;
-const getProductByCategory = async (category_slug, pageNumber) => await productRepo.getProductByCategory(category_slug, pageNumber);
+const getProductByCategory = async (category_slug, pageNumber) => {
+    const cacheKey = `products:${category_slug || "all"}:page:${pageNumber}`;
+    const cachedData = await redis_js_1.default.get(cacheKey);
+    if (cachedData) {
+        return JSON.parse(cachedData);
+    }
+    const { data, pagination, category } = await productRepo.getProductByCategory(category_slug, pageNumber);
+    await redis_js_1.default.setEx(cacheKey, 3600, JSON.stringify({ data, pagination, category }));
+    return { data, pagination, category };
+};
 exports.getProductByCategory = getProductByCategory;
 const getProductBySlug = async (slug) => await productRepo.getProductBySlug(slug);
 exports.getProductBySlug = getProductBySlug;
@@ -51,6 +61,10 @@ const createProduct = async (files, data) => {
     if (data.discount_percent > 0) {
         data.sale_price = data.price * ((100 - data.discount_percent) / 100);
     }
+    const keys = await redis_js_1.default.keys("products:*");
+    if (keys.length > 0) {
+        await redis_js_1.default.del(keys);
+    }
     return await productRepo.createProduct(files, data);
 };
 exports.createProduct = createProduct;
@@ -58,6 +72,10 @@ const deleteProduct = async (id) => {
     const isProduct = await productRepo.getProductById(Number(id.id));
     if (!isProduct) {
         throw new Error("NOT_FOUND_PRODUCT");
+    }
+    const keys = await redis_js_1.default.keys("products:*");
+    if (keys.length > 0) {
+        await redis_js_1.default.del(keys);
     }
     return await productRepo.deleteProduct(id);
 };
@@ -72,6 +90,21 @@ const updateProduct = async (files, id, data) => {
     if (data.discount_percent > 0) {
         data.sale_price = data.price * ((100 - data.discount_percent) / 100);
     }
+    const keys = await redis_js_1.default.keys("products:*");
+    if (keys.length > 0) {
+        await redis_js_1.default.del(keys);
+    }
     return await productRepo.updateProduct(files, id, data);
 };
 exports.updateProduct = updateProduct;
+const updateProductQuickActions = async (id, data) => {
+    const isProduct = await productRepo.getProductById(id);
+    if (!isProduct)
+        throw new Error("NOT_FOUND_PRODUCT");
+    const keys = await redis_js_1.default.keys("products:*");
+    if (keys.length > 0) {
+        await redis_js_1.default.del(keys);
+    }
+    return await productRepo.updateProductQuickActions(id, data);
+};
+exports.updateProductQuickActions = updateProductQuickActions;

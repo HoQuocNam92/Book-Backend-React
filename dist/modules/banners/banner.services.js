@@ -33,37 +33,37 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfile = exports.getProfile = exports.deleteUser = exports.getUserById = exports.getAllUsers = void 0;
-const userRepo = __importStar(require("./user.repositories.js"));
-const getAllUsers = async (page) => {
-    return await userRepo.getAllUsers(page);
+exports.deleteBanner = exports.updateBanner = exports.createNewBanner = exports.getBannersTypes = exports.getAllBanners = void 0;
+const bannersRepo = __importStar(require("./banner.repositories.js"));
+const getAllBanners = async (pageNumber, type) => {
+    const { banners, totalPages } = await bannersRepo.getBanners(pageNumber, type);
+    return { banners, totalPages };
 };
-exports.getAllUsers = getAllUsers;
-const getUserById = async (id) => {
-    const user = await userRepo.getUserById(id);
-    if (!user) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
+exports.getAllBanners = getAllBanners;
+const getBannersTypes = async (type) => {
+    const types = await bannersRepo.getBannersTypes(type);
+    return types;
+};
+exports.getBannersTypes = getBannersTypes;
+const createNewBanner = async (data, file) => {
+    const banner = await bannersRepo.createBanner(data, file);
+    return banner;
+};
+exports.createNewBanner = createNewBanner;
+const updateBanner = async (id, data, file) => {
+    const existingBanner = await bannersRepo.getBannerById(id);
+    if (!existingBanner) {
+        throw new Error("BANNER_NOT_FOUND");
     }
-    return user;
+    const banner = await bannersRepo.updateBannerById(id, data, file);
+    return banner;
 };
-exports.getUserById = getUserById;
-const deleteUser = async (id) => {
-    const user = await userRepo.getUserById(id);
-    if (!user) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
+exports.updateBanner = updateBanner;
+const deleteBanner = async (id) => {
+    const existingBanner = await bannersRepo.getBannerById(id);
+    if (!existingBanner) {
+        throw new Error("BANNER_NOT_FOUND");
     }
-    return await userRepo.deleteUser(id);
+    await bannersRepo.deleteBannerById(id);
 };
-exports.deleteUser = deleteUser;
-const getProfile = async (userId) => {
-    const profile = await userRepo.getProfile(userId);
-    if (!profile) {
-        throw { status: 404, message: 'Không tìm thấy người dùng' };
-    }
-    return profile;
-};
-exports.getProfile = getProfile;
-const updateProfile = async (userId, data, file) => {
-    return await userRepo.updateProfile(userId, data, file);
-};
-exports.updateProfile = updateProfile;
+exports.deleteBanner = deleteBanner;

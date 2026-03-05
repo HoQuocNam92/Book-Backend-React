@@ -38,8 +38,9 @@ const category_schema_js_1 = require("./category.schema.js");
 const categoryService = __importStar(require("./category.services.js"));
 const getAllCategories = async (req, res, next) => {
     try {
-        const categories = await categoryService.getAllCategories();
-        res.status(200).json({ message: "Lấy danh mục thành công", data: categories });
+        const page = parseInt(req.query.page) || 1;
+        const { categories, totalPages } = await categoryService.getAllCategories(page);
+        res.status(200).json({ message: "Lấy danh mục thành công", data: categories, totalPages });
     }
     catch (error) {
         next(error);

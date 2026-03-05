@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProduct = exports.getProductImageById = exports.getProductBySlug = exports.getProductById = exports.deleteProduct = exports.createProduct = exports.getProductByCategory = exports.getHomeProducts = void 0;
+exports.updateProductQuickActions = exports.updateProduct = exports.getProductImageById = exports.getProductBySlug = exports.getProductById = exports.deleteProduct = exports.createProduct = exports.getProductByCategory = exports.getHomeProducts = void 0;
 const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
 const cloudinary_js_1 = __importDefault(require("../../utils/cloudinary.js"));
 const getHomeProducts = async () => {
@@ -16,12 +16,17 @@ const getHomeProducts = async () => {
                 take: 1,
                 select: { url: true },
             },
+        },
+        where: {
+            status: "active"
         }
     });
     const discountBooksPromise = prisma_js_1.default.books.findMany({
         take,
         where: {
             discount_percent: { gt: 0 },
+            sale_price: { gt: 0 },
+            status: "active"
         },
         orderBy: { discount_percent: "desc" },
         include: {
@@ -31,36 +36,27 @@ const getHomeProducts = async () => {
             }
         },
     });
-    const bestSellerPromise = prisma_js_1.default.orderItems.groupBy({
-        by: ["book_id"],
-        _sum: { quantity: true },
+    const featuredPromise = prisma_js_1.default.books.findMany({
         orderBy: {
-            _sum: { quantity: "desc" },
+            created_at: "desc",
         },
         take,
+        where: {
+            isFeatured: true,
+            status: "active"
+        },
+        include: {
+            BookImages: {
+                take: 1,
+                select: { url: true },
+            }
+        },
     });
-    const [newBooks, discountBooks, bestSellerRaw] = await Promise.all([
+    const [newBooks, discountBooks, featuredBooks] = await Promise.all([
         newBooksPromise,
         discountBooksPromise,
-        bestSellerPromise,
+        featuredPromise,
     ]);
-    const bestSellerIds = bestSellerRaw
-        .map((x) => x.book_id)
-        .filter((id) => id !== null);
-    let bestSellerBooks = [];
-    if (bestSellerIds.length > 0) {
-        const books = await prisma_js_1.default.books.findMany({
-            where: { id: { in: bestSellerIds } },
-            include: {
-                BookImages: {
-                    take: 1,
-                    select: { url: true },
-                }
-            },
-        });
-        const map = new Map(bestSellerRaw.map((x) => [x.book_id, x._sum.quantity ?? 0]));
-        bestSellerBooks = books.sort((a, b) => (map.get(b.id) ?? 0) - (map.get(a.id) ?? 0));
-    }
     const formatBook = (p) => ({
         ...p,
         BookImages: p.BookImages[0]?.url || null,
@@ -70,7 +66,7 @@ const getHomeProducts = async () => {
     });
     return {
         newBooks: newBooks.map(formatBook),
-        bestSellerBooks: bestSellerBooks.map(formatBook),
+        featuredBooks: featuredBooks.map(formatBook),
         discountBooks: discountBooks.map(formatBook),
     };
 };
@@ -78,67 +74,23 @@ exports.getHomeProducts = getHomeProducts;
 const getProductByCategory = async (category_slug, pageNumber) => {
     const pageSize = 30;
     const skip = (pageNumber - 1) * pageSize;
-    if (category_slug === "all") {
-        const totalItems = await prisma_js_1.default.books.count();
-        const products = await prisma_js_1.default.books.findMany({
-            skip,
-            take: pageSize,
-            orderBy: { id: "desc" },
-            select: {
-                id: true,
-                title: true,
-                sale_price: true,
-                price: true,
-                status: true,
-                slug: true,
-                discount_percent: true,
-                stock: true,
-                BookImages: {
-                    take: 1,
-                    select: { url: true },
-                },
-                Categories: {
-                    select: {
-                        name: true,
-                        slug: true,
-                    },
-                }
-            },
+    let whereConditions = {};
+    let parentCategory;
+    const slug = category_slug === "all" ? undefined : category_slug;
+    if (slug) {
+        parentCategory = await prisma_js_1.default.categories.findFirst({
+            where: { slug },
+            select: { id: true },
         });
-        const totalPages = Math.ceil(totalItems / pageSize);
-        return {
-            data: products.map((p) => ({
-                ...p,
-                BookImages: p.BookImages[0]?.url || null,
-                price: Number(p.price),
-                sale_price: Number(p.sale_price),
-                discount_percent: Number(p.discount_percent),
-            })),
-            pagination: {
-                page: pageNumber,
-                pageSize,
-                totalItems,
-                totalPages,
+        whereConditions = {
+            category_id: {
+                in: (await prisma_js_1.default.categories.findMany({
+                    where: { parent_id: parentCategory?.id },
+                    select: { id: true },
+                })).map((c) => c.id),
             },
-            category: {
-                name: products[0].Categories?.name,
-                slug: products[0].Categories?.slug,
-            }
         };
     }
-    const slug = category_slug;
-    const parentCategory = await prisma_js_1.default.categories.findFirst({
-        where: { slug },
-        select: { id: true },
-    });
-    const whereConditions = {
-        category_id: {
-            in: (await prisma_js_1.default.categories.findMany({
-                where: { parent_id: parentCategory?.id },
-                select: { id: true },
-            })).map((c) => c.id),
-        },
-    };
     const totalItems = await prisma_js_1.default.books.count({
         where: whereConditions
     });
@@ -154,7 +106,13 @@ const getProductByCategory = async (category_slug, pageNumber) => {
             slug: true,
             status: true,
             stock: true,
+            description: true,
             discount_percent: true,
+            BookPromotions: {
+                select: {
+                    content: true,
+                }
+            },
             BookImages: {
                 take: 1,
                 select: { url: true },
@@ -164,7 +122,15 @@ const getProductByCategory = async (category_slug, pageNumber) => {
                     name: true,
                     slug: true,
                 },
-            }
+            },
+            Brands: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                }
+            },
+            isFeatured: true,
         },
         where: whereConditions,
     });
@@ -184,8 +150,8 @@ const getProductByCategory = async (category_slug, pageNumber) => {
             totalPages,
         },
         category: {
-            name: products[0].Categories?.name,
-            slug: products[0].Categories?.slug,
+            name: products[0]?.Categories?.name || null,
+            slug: products[0]?.Categories?.slug || null,
         }
     };
 };
@@ -214,6 +180,7 @@ const createProduct = async (files, data) => {
                     discount_percent: data.discount_percent,
                     description: data.description,
                     sale_price: data.sale_price,
+                    status: data.status,
                 },
             });
             if (data.attri?.length) {
@@ -341,12 +308,15 @@ const getProductImageById = async (id) => {
 };
 exports.getProductImageById = getProductImageById;
 const updateProduct = async (files, id, data) => {
+    console.log("Check data in repo", data);
     const uploadedAssets = [];
-    for (let i = 0; i < files.length; i++) {
-        const b64 = Buffer.from(files[i].buffer).toString("base64");
-        const dataURI = `data:${files[i].mimetype};base64,${b64}`;
-        const uploaded = await cloudinary_js_1.default.uploader.upload(dataURI, { folder: "Books" });
-        uploadedAssets.push({ secure_url: uploaded.secure_url, public_id: uploaded.public_id });
+    if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            const b64 = Buffer.from(files[i].buffer).toString("base64");
+            const dataURI = `data:${files[i].mimetype};base64,${b64}`;
+            const uploaded = await cloudinary_js_1.default.uploader.upload(dataURI, { folder: "Books" });
+            uploadedAssets.push({ secure_url: uploaded.secure_url, public_id: uploaded.public_id });
+        }
     }
     try {
         const books = await prisma_js_1.default.$transaction(async (tx) => {
@@ -361,6 +331,8 @@ const updateProduct = async (files, id, data) => {
                     discount_percent: data.discount_percent,
                     description: data.description,
                     sale_price: data.sale_price,
+                    isFeatured: data.is_featured,
+                    status: data.status,
                 },
                 where: {
                     id
@@ -399,3 +371,17 @@ const updateProduct = async (files, id, data) => {
     }
 };
 exports.updateProduct = updateProduct;
+const updateProductQuickActions = async (id, data) => {
+    const updatedData = {};
+    if (data.is_featured !== undefined) {
+        updatedData.isFeatured = data.is_featured;
+    }
+    if (data.status !== undefined) {
+        updatedData.status = data.status;
+    }
+    return await prisma_js_1.default.books.update({
+        where: { id },
+        data: updatedData,
+    });
+};
+exports.updateProductQuickActions = updateProductQuickActions;
