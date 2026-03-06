@@ -356,9 +356,7 @@ export const getProductImageById = async (id: number) => {
 
 
 export const updateProduct = async (files: Express.Multer.File[], id: number, data: productInput) => {
-    console.log("Check data in repo", data)
     const uploadedAssets: { secure_url: string; public_id: string }[] = [];
-
     if (files && files.length > 0) {
 
         for (let i = 0; i < files.length; i++) {
@@ -366,7 +364,6 @@ export const updateProduct = async (files: Express.Multer.File[], id: number, da
             const dataURI = `data:${files[i].mimetype};base64,${b64}`;
             const uploaded = await cloudinary.uploader.upload(dataURI, { folder: "Books" });
             uploadedAssets.push({ secure_url: uploaded.secure_url, public_id: uploaded.public_id });
-
 
         }
     }
@@ -378,13 +375,19 @@ export const updateProduct = async (files: Express.Multer.File[], id: number, da
                     price: data.price,
                     stock: data.stock,
                     slug: data.slug,
-                    brand_id: data.brand_id,
-                    category_id: data.category_id,
+                    Brands: {
+                        connect: { id: data.brand_id }
+                    },
+
+                    Categories: {
+                        connect: { id: data.category_id }
+                    },
                     discount_percent: data.discount_percent,
                     description: data.description,
                     sale_price: data.sale_price,
                     isFeatured: data.is_featured,
                     status: data.status,
+                    updated_at: new Date(),
                 },
                 where: {
                     id

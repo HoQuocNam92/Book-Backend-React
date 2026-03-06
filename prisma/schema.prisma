@@ -84,6 +84,7 @@ model Books {
   sold             Int              @default(0, map: "DF__Books__sold__45544755")
   isFeatured       Boolean          @default(false, map: "DF__Books__isFeature__46486B8E")
   created_at       DateTime?        @default(now(), map: "DF__Books__created_a__5165187F") @db.DateTime
+  updated_at       DateTime?        @db.DateTime
   BookAttributes   BookAttributes[]
   BookAuthors      BookAuthors[]
   BookImages       BookImages[]

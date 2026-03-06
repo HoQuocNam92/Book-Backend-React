@@ -7,7 +7,7 @@ router.get('/', productController.getProducts);
 router.get('/detail/:slug', productController.getProductBySlug);
 router.get('/:category_slug', productController.getProductByCategory);
 router.post('/', upload.array("images", 10), productController.createProduct);
-router.put('/:id', productController.updateProduct);
+router.put('/:id', upload.array("images", 10), productController.updateProduct);
 
 router.delete('/:id', productController.deleteProduct);
 

@@ -12,7 +12,7 @@ router.get('/:category_slug', productController.getProductByCategory);
 router.post('/', upload.array("images", 10), productController.createProduct);
 router.put('/quickActions/:id', productController.updateProductQuickActions);
 
-router.put('/:id', productController.updateProduct);
+router.put('/:id', upload.array("images", 10), productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 
 router.post('/del', async (req, res) => {
