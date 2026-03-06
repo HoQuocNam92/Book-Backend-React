@@ -15,6 +15,8 @@ import couponRoute from './coupons/coupon.routes.js';
 import revenueRoute from './revenues/revenue.routes.js';
 import relatedRoute from './related/related.routes.js';
 import reviewRoute from './reviews/review.routes.js';
+import searchRoute from './searchs/search.routes.js';
+import newsRoute from './news/news.routes.js';
 import express from 'express';
 const router = express.Router();
 
@@ -36,4 +38,6 @@ router.use('/coupons', couponRoute);
 router.use('/revenues', revenueRoute);
 router.use('/related', relatedRoute);
 router.use('/reviews', reviewRoute);
+router.use('/search', searchRoute);
+router.use('/news', newsRoute);
 export default router;

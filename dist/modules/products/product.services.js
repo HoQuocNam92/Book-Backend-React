@@ -48,6 +48,12 @@ const getProductByCategory = async (category_slug, pageNumber) => {
     if (cachedData) {
         return JSON.parse(cachedData);
     }
+    if (category_slug !== "all") {
+        const isCategory = await productRepo.getCategoryBySlug(category_slug);
+        if (!isCategory) {
+            throw new Error("NOT_FOUND_CATEGORY");
+        }
+    }
     const { data, pagination, category } = await productRepo.getProductByCategory(category_slug, pageNumber);
     await redis_js_1.default.setEx(cacheKey, 3600, JSON.stringify({ data, pagination, category }));
     return { data, pagination, category };

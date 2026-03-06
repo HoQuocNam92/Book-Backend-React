@@ -60,8 +60,8 @@ const updateOrderStatus = async (id, status) => {
     return await orderRepo.updateOrderStatus(id, status);
 };
 exports.updateOrderStatus = updateOrderStatus;
-const getMyOrders = async (userId) => {
-    return await orderRepo.getOrdersByUserId(userId);
+const getMyOrders = async (userId, page) => {
+    return await orderRepo.getOrdersByUserId(userId, page);
 };
 exports.getMyOrders = getMyOrders;
 const deleteOrder = async (id) => {
