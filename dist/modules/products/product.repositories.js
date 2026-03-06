@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProductQuickActions = exports.updateProduct = exports.getProductImageById = exports.getProductBySlug = exports.getProductById = exports.deleteProduct = exports.createProduct = exports.getProductByCategory = exports.getHomeProducts = void 0;
+exports.getCategoryBySlug = exports.updateProductQuickActions = exports.updateProduct = exports.getProductImageById = exports.getProductBySlug = exports.getProductById = exports.deleteProduct = exports.createProduct = exports.getProductByCategory = exports.getHomeProducts = void 0;
 const prisma_js_1 = __importDefault(require("../../utils/prisma.js"));
 const cloudinary_js_1 = __importDefault(require("../../utils/cloudinary.js"));
 const getHomeProducts = async () => {
@@ -106,19 +106,14 @@ const getProductByCategory = async (category_slug, pageNumber) => {
             slug: true,
             status: true,
             stock: true,
-            description: true,
             discount_percent: true,
-            BookPromotions: {
-                select: {
-                    content: true,
-                }
-            },
             BookImages: {
                 take: 1,
                 select: { url: true },
             },
             Categories: {
                 select: {
+                    id: true,
                     name: true,
                     slug: true,
                 },
@@ -247,15 +242,20 @@ exports.getProductById = getProductById;
 const getProductBySlug = async (slug) => {
     const product = await prisma_js_1.default.books.findFirst({
         where: { slug },
-        include: {
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            price: true,
+            status: true,
+            stock: true,
+            slug: true,
+            sale_price: true,
+            discount_percent: true,
+            isFeatured: true,
             BookImages: true,
             Categories: true,
             Brands: true,
-            BookAuthors: {
-                include: {
-                    Authors: true,
-                }
-            },
             BookAttributes: true,
             Reviews: {
                 include: {
@@ -266,36 +266,42 @@ const getProductBySlug = async (slug) => {
                 orderBy: { create_at: 'desc' },
                 take: 20,
             },
-            BookPromotions: true
+            BookPromotions: true,
+            BookAuthors: {
+                include: {
+                    Authors: true,
+                },
+            }
         }
     });
     if (!product)
         return null;
-    const relatedBooks = await prisma_js_1.default.books.findMany({
-        where: {
-            category_id: product.category_id,
-            id: { not: product.id },
-        },
-        take: 6,
-        include: {
-            BookImages: {
-                take: 1,
-                select: { url: true },
-            }
-        },
-    });
+    // const relatedBooks = await prisma.books.findMany({
+    //     where: {
+    //         category_id: product.category_id,
+    //         id: { not: product.id },
+    //     },
+    //     take: 6,
+    //     include: {
+    //         BookImages: {
+    //             take: 1,
+    //             select: { url: true },
+    //         }
+    //     },
+    // });
+    //   relatedBooks: relatedBooks.map((b: any) => ({
+    //             ...b,
+    //             BookImages: b.BookImages[0]?.url,
+    //             price: Number(b.price),
+    //             sale_price: b.sale_price ? Number(b.sale_price) : null,
+    //             discount_percent: b.discount_percent || 0,
+    //         })),
     return {
         ...product,
         price: Number(product.price),
         sale_price: product.sale_price ? Number(product.sale_price) : null,
         discount_percent: product.discount_percent || 0,
-        relatedBooks: relatedBooks.map((b) => ({
-            ...b,
-            BookImages: b.BookImages[0]?.url,
-            price: Number(b.price),
-            sale_price: b.sale_price ? Number(b.sale_price) : null,
-            discount_percent: b.discount_percent || 0,
-        })),
+        BookImages: product.BookImages
     };
 };
 exports.getProductBySlug = getProductBySlug;
@@ -385,3 +391,12 @@ const updateProductQuickActions = async (id, data) => {
     });
 };
 exports.updateProductQuickActions = updateProductQuickActions;
+const getCategoryBySlug = async (slug) => {
+    return await prisma_js_1.default.categories.findFirst({
+        where: { slug },
+        select: {
+            id: true,
+        }
+    });
+};
+exports.getCategoryBySlug = getCategoryBySlug;

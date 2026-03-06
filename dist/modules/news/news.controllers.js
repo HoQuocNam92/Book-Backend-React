@@ -33,74 +33,77 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteOrder = exports.updateOrderStatus = exports.getOrderById = exports.getAllOrders = exports.getMyOrders = void 0;
-const orderServices = __importStar(require("./order.services.js"));
-const getMyOrders = async (req, res, next) => {
-    try {
-        const userId = req.user.id;
-        const page = parseInt(req.query.page) || 1;
-        const { orders, totalPages } = await orderServices.getMyOrders(userId, page);
-        res.status(200).json({ message: 'Lấy đơn hàng của bạn thành công', data: orders, totalPages });
-    }
-    catch (error) {
-        next(error);
-    }
-};
-exports.getMyOrders = getMyOrders;
-const getAllOrders = async (req, res, next) => {
+exports.deleteNews = exports.updateNews = exports.createNews = exports.getNewsBySlug = exports.getPublishedNews = exports.getAllNews = void 0;
+const newsServices = __importStar(require("./news.services.js"));
+const getAllNews = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const { orders, totalPages } = await orderServices.getAllOrders(page);
-        res.status(200).json({ message: 'Lấy danh sách đơn hàng thành công', data: orders, totalPages });
+        const { news, totalPages } = await newsServices.getAllNews(page);
+        return res.json({ message: 'Lấy tin tức thành công', data: news, totalPages });
     }
     catch (error) {
         next(error);
     }
 };
-exports.getAllOrders = getAllOrders;
-const getOrderById = async (req, res, next) => {
+exports.getAllNews = getAllNews;
+const getPublishedNews = async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const { news, totalPages } = await newsServices.getPublishedNews(page);
+        return res.json({ message: 'Lấy tin tức thành công', data: news, totalPages });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getPublishedNews = getPublishedNews;
+const getNewsBySlug = async (req, res, next) => {
+    try {
+        const slug = req.params.slug;
+        const news = await newsServices.getNewsBySlug(slug);
+        if (!news) {
+            return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+        }
+        return res.json({ message: 'Lấy tin tức thành công', data: news });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getNewsBySlug = getNewsBySlug;
+const createNews = async (req, res, next) => {
+    try {
+        const news = await newsServices.createNews(req.body);
+        return res.status(201).json({ message: 'Tạo tin tức thành công', data: news });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.createNews = createNews;
+const updateNews = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
-        if (isNaN(id)) {
+        if (isNaN(id))
             return res.status(400).json({ message: 'ID không hợp lệ' });
-        }
-        const order = await orderServices.getOrderById(id);
-        res.status(200).json({ message: 'Lấy đơn hàng thành công', data: order });
+        const news = await newsServices.updateNews(id, req.body);
+        return res.json({ message: 'Cập nhật tin tức thành công', data: news });
     }
     catch (error) {
         next(error);
     }
 };
-exports.getOrderById = getOrderById;
-const updateOrderStatus = async (req, res, next) => {
+exports.updateNews = updateNews;
+const deleteNews = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
-        if (isNaN(id)) {
+        if (isNaN(id))
             return res.status(400).json({ message: 'ID không hợp lệ' });
-        }
-        const { status } = req.body;
-        if (!status) {
-            return res.status(400).json({ message: 'Vui lòng nhập trạng thái' });
-        }
-        const order = await orderServices.updateOrderStatus(id, status);
-        res.status(200).json({ message: 'Cập nhật trạng thái thành công', data: order });
+        await newsServices.deleteNews(id);
+        return res.json({ message: 'Xóa tin tức thành công' });
     }
     catch (error) {
         next(error);
     }
 };
-exports.updateOrderStatus = updateOrderStatus;
-const deleteOrder = async (req, res, next) => {
-    try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            return res.status(400).json({ message: 'ID không hợp lệ' });
-        }
-        await orderServices.deleteOrder(id);
-        res.status(200).json({ message: 'Xóa đơn hàng thành công' });
-    }
-    catch (error) {
-        next(error);
-    }
-};
-exports.deleteOrder = deleteOrder;
+exports.deleteNews = deleteNews;
