@@ -166,6 +166,10 @@ export const errorMiddleware = (
       return res.status(400).json({
         message: 'Ảnh thumbnail là bắt buộc',
       });
+    case 'FORBIDDEN':
+      return res.status(403).json({
+        message: 'Bạn không có quyền thực hiện hành động này',
+      });
     default:
       console.error('Unhandled error:', err);
       return res.status(500).json({

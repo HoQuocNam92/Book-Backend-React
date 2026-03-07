@@ -53,7 +53,7 @@ export const signIn = async (data: signInInput) => {
     ExpiresAt: expires,
   });
   const customer =
-    { id: user.id, name: user?.name, role_id: user?.UserRoles }
+    { id: user.id, name: user?.name, role_id: user?.UserRoles.map((x) => x.role_id) }
 
   return { user: customer, accessToken, refreshToken };
 };
@@ -197,4 +197,9 @@ export const signInWithGoogle = async (code: string) => {
 
 export const signOut = async (user_id: number) => {
   return await authRepo.deleteRefreshTokens(user_id);
+}
+
+
+export const findUserById = async (id: number) => {
+  return await authRepo.findUserById(id);
 }

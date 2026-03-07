@@ -1,4 +1,5 @@
 import authentication from '../../middlewares/auth/authentication.js';
+import authorization from '../../middlewares/auth/authorization.js';
 import refreshTokenMiddleware from '../../middlewares/auth/refreshTokenMiddleware.js';
 import * as authController from './auth.controllers.js';
 import express from 'express';
