@@ -74,3 +74,17 @@ export const getRefreshTokens = async (id: number) => {
 export const deleteRefreshTokens = async (user_id: number) => {
   return await prisma.refreshTokens.deleteMany({ where: { UserId: user_id } });
 };
+
+export const findUserById = async (id: number) => {
+  return await prisma.users.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      UserRoles: {
+        select: {
+          role_id: true,
+        },
+      },
+    },
+  });
+}
