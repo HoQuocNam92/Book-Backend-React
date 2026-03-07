@@ -46,7 +46,7 @@ router.get('/detail/:slug', productController.getProductBySlug);
 router.get('/:category_slug', productController.getProductByCategory);
 router.post('/', upload_js_1.upload.array("images", 10), productController.createProduct);
 router.put('/quickActions/:id', productController.updateProductQuickActions);
-router.put('/:id', productController.updateProduct);
+router.put('/:id', upload_js_1.upload.array("images", 10), productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 router.post('/del', async (req, res) => {
     const keys = await redis_js_1.default.keys('products:*');

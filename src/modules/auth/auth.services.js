@@ -37,11 +37,11 @@ export const signIn = async (data) => {
         exp: '7d',
     });
     const tokenHash = await bcrypt.hash(refreshToken, 10);
-    const experis = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await authRepo.addRefreshTokens({
         UserId: user.id,
         TokenHash: tokenHash,
-        ExpiresAt: experis,
+        ExpiresAt: expires,
     });
     const customer = { id: user.id, name: user?.name, role_id: user?.UserRoles };
     return { user: customer, accessToken, refreshToken };
@@ -100,11 +100,11 @@ export const refreshToken = async (data) => {
         exp: '7d',
     });
     const tokenHash = await bcrypt.hash(refreshToken, 10);
-    const experis = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await authRepo.addRefreshTokens({
         UserId: data.id,
         TokenHash: tokenHash,
-        ExpiresAt: experis,
+        ExpiresAt: expires,
     });
     return { accessToken, refreshToken };
 };

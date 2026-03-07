@@ -38,11 +38,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const newsControllers = __importStar(require("./news.controllers.js"));
+const upload_js_1 = require("../../utils/upload.js");
 const router = express_1.default.Router();
 router.get('/', newsControllers.getAllNews);
 router.get('/published', newsControllers.getPublishedNews);
 router.get('/:slug', newsControllers.getNewsBySlug);
-router.post('/', newsControllers.createNews);
-router.put('/:id', newsControllers.updateNews);
+router.post('/', upload_js_1.upload.single('thumbnail'), newsControllers.createNews);
+router.put('/:id', upload_js_1.upload.single('thumbnail'), newsControllers.updateNews);
 router.delete('/:id', newsControllers.deleteNews);
 exports.default = router;

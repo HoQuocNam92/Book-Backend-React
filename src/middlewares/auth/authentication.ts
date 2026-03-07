@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import 'dotenv';
 import { IverifyToken } from '../../interfaces/IverifyToken.js';
 import type { AuthRequest } from '../../interfaces/IAuthRequest.js';
-import { refreshToken } from '../../modules/auth/auth.controllers';
 
 const authentication = (
   req: AuthRequest,
@@ -15,13 +14,11 @@ const authentication = (
     if (!token) {
       throw new Error('UNAUTHORIZED');
     }
-
     const decoded = jwt.verify(
       token!,
       process.env.ACCESSTOKEN as string,
     ) as IverifyToken;
     if (!decoded || typeof decoded === 'string') {
-      console.log("Hello")
       throw new Error('INVALID_TOKEN');
     }
     req.user = decoded;

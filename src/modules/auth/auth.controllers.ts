@@ -32,7 +32,9 @@ export const signIn = async (
   next: NextFunction,
 ) => {
   try {
+    console.log('req', req.body);
     const data = signInSchema.parse(req.body);
+
     const { user, accessToken, refreshToken } = await authService.signIn(data);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -91,7 +93,7 @@ export const signInWithGoogle = async (
       sameSite: 'strict',
       secure: false,
     });
-    return res.redirect("http://localhost:5173/");
+    return res.redirect("http://localhost:5173/oauth-success");
   } catch (err) {
     next(err);
   }

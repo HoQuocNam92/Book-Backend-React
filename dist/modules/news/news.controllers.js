@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteNews = exports.updateNews = exports.createNews = exports.getNewsBySlug = exports.getPublishedNews = exports.getAllNews = void 0;
 const newsServices = __importStar(require("./news.services.js"));
+const news_schema_js_1 = require("./news.schema.js");
 const getAllNews = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -73,7 +74,12 @@ const getNewsBySlug = async (req, res, next) => {
 exports.getNewsBySlug = getNewsBySlug;
 const createNews = async (req, res, next) => {
     try {
-        const news = await newsServices.createNews(req.body);
+        const file = req.file;
+        if (!file) {
+            throw new Error('THUMBNAIL_REQUIRED');
+        }
+        const validateData = news_schema_js_1.newsSchema.parse(req.body);
+        const news = await newsServices.createNews(validateData, file);
         return res.status(201).json({ message: 'Tạo tin tức thành công', data: news });
     }
     catch (error) {
@@ -83,10 +89,15 @@ const createNews = async (req, res, next) => {
 exports.createNews = createNews;
 const updateNews = async (req, res, next) => {
     try {
+        const file = req.file;
         const id = parseInt(req.params.id);
         if (isNaN(id))
             return res.status(400).json({ message: 'ID không hợp lệ' });
-        const news = await newsServices.updateNews(id, req.body);
+        if (!file) {
+            throw new Error('THUMBNAIL_REQUIRED');
+        }
+        const validateData = news_schema_js_1.newsSchema.parse(req.body);
+        const news = await newsServices.updateNews(id, validateData, file);
         return res.json({ message: 'Cập nhật tin tức thành công', data: news });
     }
     catch (error) {

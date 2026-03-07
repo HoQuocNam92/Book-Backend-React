@@ -12,7 +12,6 @@ export const getAllBrands = async (req, res, next) => {
 export const createBrand = async (req, res, next) => {
     try {
         const file = req.file;
-        console.log('Received file:', file);
         if (!file) {
             return res.status(403).json({ message: "Vui lòng thêm ảnh" });
         }

@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { AuthRequest } from '../../interfaces/IAuthRequest.js';
 import * as authRepo from '../../modules/auth/auth.repositories.js';
 import bcrypt from 'bcrypt';
+import { IverifyToken } from '../../interfaces/IverifyToken.js';
 export const refreshTokenMiddleware = async (
   req: AuthRequest,
   res: Response,
@@ -16,16 +17,14 @@ export const refreshTokenMiddleware = async (
     const decoded = jwt.verify(
       token!,
       process.env.REFRESHTOKEN!,
-    ) as JwtPayload & {
-      id: number;
-      role_id: number[];
-    };
+    ) as IverifyToken;
     const verify = await authRepo.getRefreshTokens(decoded.id);
+
     if (!verify) {
       throw new Error('TOKEN_NOT_FOUND');
     }
-    if (verify.ExpiresAt < new Date()) {
-      throw new Error('TOKEN_ALREADY_EXPIRED');
+    if (!verify || verify.ExpiresAt < new Date()) {
+      throw new Error("TOKEN_ALREADY_EXPIRED");
     }
     const isMatch = await bcrypt.compare(token, verify.TokenHash);
     if (!isMatch) {
