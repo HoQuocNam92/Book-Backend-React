@@ -12,6 +12,8 @@ import sendMail from '../../utils/sendMail.js';
 import { IverifyToken } from '../../interfaces/IverifyToken.js';
 import axios from 'axios';
 import { oAuth2Client } from './logic/oAuth2Client.js';
+import { createAccessToken } from '../../utils/token/createAccessToken.js';
+import { createRefreshToken } from '../../utils/token/createRefreshToken.js';
 export const signUp = async (data: signUpInput) => {
   const user = await authRepo.findUserByEmail(data.email);
   if (user) {
@@ -34,24 +36,21 @@ export const signIn = async (data: signInInput) => {
   if (!verifyPassword) {
     throw new Error('PASSWORD_INCORRECT');
   }
-  const accessToken = generateToken({
+  const accessToken = createAccessToken({
     id: user.id,
     role_id: user.UserRoles.map((x) => x.role_id),
-    secret: process.env.ACCESSTOKEN!,
-    exp: '1h',
   });
-  const refreshToken = generateToken({
+  const refreshToken = createRefreshToken({
     id: user.id,
     role_id: user.UserRoles.map((x) => x.role_id),
-    secret: process.env.REFRESHTOKEN!,
-    exp: '7d',
   });
   const tokenHash = await bcrypt.hash(refreshToken, 10);
-  const experis = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  await authRepo.deleteRefreshTokens(user.id);
   await authRepo.addRefreshTokens({
     UserId: user.id,
     TokenHash: tokenHash,
-    ExpiresAt: experis,
+    ExpiresAt: expires,
   });
   const customer =
     { id: user.id, name: user?.name, role_id: user?.UserRoles }
@@ -105,24 +104,23 @@ export const resetPassord = async (id: number, password: passwordInput) => {
 };
 
 export const refreshToken = async (data: IverifyToken) => {
-  const accessToken = generateToken({
+  const accessToken = createAccessToken({
     id: data.id,
     role_id: data.role_id,
-    secret: process.env.ACCESSTOKEN!,
-    exp: '10m',
   });
-  const refreshToken = generateToken({
-    id: data.id,
-    role_id: data.role_id,
-    secret: process.env.REFRESHTOKEN!,
-    exp: '7d',
-  });
+  const refreshToken = createRefreshToken(
+    {
+      id: data.id,
+      role_id: data.role_id,
+    }
+  )
   const tokenHash = await bcrypt.hash(refreshToken, 10);
-  const experis = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  await authRepo.deleteRefreshTokens(data.id);
   await authRepo.addRefreshTokens({
     UserId: data.id,
     TokenHash: tokenHash,
-    ExpiresAt: experis,
+    ExpiresAt: expires,
   });
   return { accessToken, refreshToken };
 };
@@ -139,28 +137,60 @@ export const signInWithGoogle = async (code: string) => {
     }
   );
   const { name, picture, email } = userRes.data;
-  const existingUser = await authRepo.findUserByEmail(email);
-  if (existingUser) {
-    if (!existingUser.is_google) {
-      throw new Error('EMAIL_ALREADY_EXISTS');
-    }
-    return existingUser;
+  let existingUser;
+  existingUser = await authRepo.findUserByEmail(email);
+  if (!existingUser) {
+    await authRepo.createUser({ name, email }, 1, picture);
+    const user = await authRepo.findUserByEmail(email);
+    const accessToken = createAccessToken({
+      id: user!.id,
+      role_id: user!.UserRoles.map(x => x.role_id),
+    });
+
+    const refreshToken = createRefreshToken({
+      id: user!.id,
+      role_id: user!.UserRoles.map(x => x.role_id),
+    });
+    const tokenHash = await bcrypt.hash(refreshToken, 10);
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+
+    await authRepo.addRefreshTokens({
+      UserId: user!.id,
+      TokenHash: tokenHash,
+      ExpiresAt: expires,
+    });
+    return { user: user!, accessToken, refreshToken };
   }
-  await authRepo.createUser({ name, email }, 1, picture);
-  const user = await authRepo.findUserByEmail(email);
-  const accessToken = generateToken({
-    id: user?.id!,
-    role_id: user?.UserRoles.map((x) => x.role_id)!,
-    secret: process.env.ACCESSTOKEN!,
-    exp: '1h',
-  });
-  const refreshToken = generateToken({
-    id: user?.id!,
-    role_id: user?.UserRoles.map((x) => x.role_id)!,
-    secret: process.env.REFRESHTOKEN!,
-    exp: '7d',
-  });
-  return { user, accessToken, refreshToken };
+  if (existingUser && !existingUser?.is_google) {
+    throw new Error('EMAIL_ALREADY_EXISTS');
+  }
+
+  if (existingUser && existingUser.is_google) {
+    const accessToken = createAccessToken({
+      id: existingUser.id,
+      role_id: existingUser.UserRoles.map(x => x.role_id),
+    });
+
+    const refreshToken = createRefreshToken({
+      id: existingUser.id,
+      role_id: existingUser.UserRoles.map(x => x.role_id),
+    });
+    const tokenHash = await bcrypt.hash(refreshToken, 10);
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    await authRepo.deleteRefreshTokens(existingUser.id);
+
+    await authRepo.addRefreshTokens({
+      UserId: existingUser.id,
+      TokenHash: tokenHash,
+      ExpiresAt: expires,
+    });
+
+    return { user: existingUser, accessToken, refreshToken };
+  }
+
+
 
 }
 

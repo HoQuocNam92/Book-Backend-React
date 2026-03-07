@@ -17,7 +17,6 @@ export const getAllBrands = async (req: Request, res: Response, next: NextFuncti
 export const createBrand = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const file = req.file as Express.Multer.File;
-        console.log('Received file:', file);
 
         if (!file) {
             return res.status(403).json({ message: "Vui lòng thêm ảnh" });

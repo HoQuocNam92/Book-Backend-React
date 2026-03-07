@@ -65,7 +65,7 @@ const addRefreshTokens = async (data) => {
 };
 exports.addRefreshTokens = addRefreshTokens;
 const getRefreshTokens = async (id) => {
-    return await prisma_js_1.default.refreshTokens.findFirst({ where: { UserId: id } });
+    return await prisma_js_1.default.refreshTokens.findFirst({ select: { TokenHash: true, ExpiresAt: true }, where: { UserId: id } });
 };
 exports.getRefreshTokens = getRefreshTokens;
 const deleteRefreshTokens = async (user_id) => {

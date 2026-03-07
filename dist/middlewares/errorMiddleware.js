@@ -145,6 +145,14 @@ const errorMiddleware = (err, req, res, next) => {
             return res.status(400).json({
                 message: 'Sản phẩm không đủ số lượng trong kho',
             });
+        case 'NOT_FOUND_NEWS':
+            return res.status(404).json({
+                message: 'Không tìm thấy bài viết',
+            });
+        case 'THUMBNAIL_REQUIRED':
+            return res.status(400).json({
+                message: 'Ảnh thumbnail là bắt buộc',
+            });
         default:
             console.error('Unhandled error:', err);
             return res.status(500).json({

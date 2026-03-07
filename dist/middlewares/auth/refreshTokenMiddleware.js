@@ -47,12 +47,14 @@ const refreshTokenMiddleware = async (req, res, next) => {
             throw new Error('REFRESH_TOKEN_MISSING');
         }
         const decoded = jsonwebtoken_1.default.verify(token, process.env.REFRESHTOKEN);
+        console.log('decoded', decoded);
         const verify = await authRepo.getRefreshTokens(decoded.id);
+        console.log('verify', verify);
         if (!verify) {
             throw new Error('TOKEN_NOT_FOUND');
         }
-        if (verify.ExpiresAt < new Date()) {
-            throw new Error('TOKEN_ALREADY_EXPIRED');
+        if (!verify || verify.ExpiresAt < new Date()) {
+            throw new Error("TOKEN_ALREADY_EXPIRED");
         }
         const isMatch = await bcrypt_1.default.compare(token, verify.TokenHash);
         if (!isMatch) {

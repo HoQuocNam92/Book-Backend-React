@@ -53,6 +53,7 @@ const signUp = async (req, res, next) => {
 exports.signUp = signUp;
 const signIn = async (req, res, next) => {
     try {
+        console.log('req', req.body);
         const data = auth_schema_js_1.signInSchema.parse(req.body);
         const { user, accessToken, refreshToken } = await authService.signIn(data);
         res.cookie('refreshToken', refreshToken, {

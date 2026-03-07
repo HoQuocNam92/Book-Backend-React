@@ -13,7 +13,6 @@ const authentication = (req, res, next) => {
         }
         const decoded = jsonwebtoken_1.default.verify(token, process.env.ACCESSTOKEN);
         if (!decoded || typeof decoded === 'string') {
-            console.log("Hello");
             throw new Error('INVALID_TOKEN');
         }
         req.user = decoded;

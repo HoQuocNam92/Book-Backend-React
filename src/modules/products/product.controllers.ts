@@ -33,7 +33,6 @@ export const getProductByCategory = async (req: Request, res: Response, next: Ne
         const pageNumber = Number(req.query?.page) || 1;
 
         const category_slug = req.params?.category_slug || "";
-        console.log("category_slug", category_slug)
         const { data, pagination, category } = await productService.getProductByCategory(category_slug as string, pageNumber);
         return res.status(200).json({ message: "Lấy danh sách sản phẩm thành công", data, pagination, category });
     } catch (error) {

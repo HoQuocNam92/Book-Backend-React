@@ -314,7 +314,6 @@ const getProductImageById = async (id) => {
 };
 exports.getProductImageById = getProductImageById;
 const updateProduct = async (files, id, data) => {
-    console.log("Check data in repo", data);
     const uploadedAssets = [];
     if (files && files.length > 0) {
         for (let i = 0; i < files.length; i++) {
@@ -332,13 +331,18 @@ const updateProduct = async (files, id, data) => {
                     price: data.price,
                     stock: data.stock,
                     slug: data.slug,
-                    brand_id: data.brand_id,
-                    category_id: data.category_id,
+                    Brands: {
+                        connect: { id: data.brand_id }
+                    },
+                    Categories: {
+                        connect: { id: data.category_id }
+                    },
                     discount_percent: data.discount_percent,
                     description: data.description,
                     sale_price: data.sale_price,
                     isFeatured: data.is_featured,
                     status: data.status,
+                    updated_at: new Date(),
                 },
                 where: {
                     id

@@ -32,8 +32,12 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteNews = exports.updateNews = exports.createNews = exports.getNewsBySlug = exports.getPublishedNews = exports.getAllNews = void 0;
+const slugify_1 = __importDefault(require("slugify"));
 const newsRepository = __importStar(require("./news.repositories.js"));
 const getAllNews = async (page = 1) => {
     return newsRepository.getAllNews(page);
@@ -47,15 +51,29 @@ const getNewsBySlug = async (slug) => {
     return newsRepository.getNewsBySlug(slug);
 };
 exports.getNewsBySlug = getNewsBySlug;
-const createNews = async (data) => {
-    return newsRepository.createNews(data);
+const createNews = async (data, file) => {
+    const slug = (0, slugify_1.default)(data.title, {
+        lower: true,
+    });
+    return newsRepository.createNews({ ...data, slug }, file);
 };
 exports.createNews = createNews;
-const updateNews = async (id, data) => {
-    return newsRepository.updateNews(id, data);
+const updateNews = async (id, data, file) => {
+    const news = await newsRepository.getNewsById(id);
+    if (!news) {
+        throw new Error('NOT_FOUND_NEWS');
+    }
+    const slug = (0, slugify_1.default)(data.title, {
+        lower: true,
+    });
+    return newsRepository.updateNews(id, { ...data, slug }, file);
 };
 exports.updateNews = updateNews;
 const deleteNews = async (id) => {
+    const news = await newsRepository.getNewsById(id);
+    if (!news) {
+        throw new Error('NOT_FOUND_NEWS');
+    }
     return newsRepository.deleteNews(id);
 };
 exports.deleteNews = deleteNews;
