@@ -133,11 +133,17 @@ model Categories {
 }
 
 model Coupons {
-  id         Int       @id(map: "PK__Coupons__3213E83F83ED3BD0") @default(autoincrement())
-  code       String?   @unique(map: "UQ__Coupons__357D4CF972178733") @db.VarChar(50)
-  discount   Decimal?  @db.Decimal(5, 2)
-  expired_at DateTime? @db.DateTime
-  Orders     Orders[]
+  id              Int       @id(map: "PK__Coupons__3213E83F83ED3BD0") @default(autoincrement())
+  code            String?   @unique(map: "UQ__Coupons__357D4CF972178733") @db.VarChar(50)
+  discount        Decimal?  @db.Decimal(10, 2)
+  expired_at      DateTime? @db.DateTime
+  discount_type   String?   @db.VarChar(20)
+  min_order_value Int?
+  max_discount    Int?
+  usage_limit     Int?
+  usage_count     Int?      @default(0, map: "DF__Coupons__usage_c__636EBA21")
+  start_at        DateTime? @db.DateTime
+  Orders          Orders[]
 }
 
 model Districts {
@@ -248,7 +254,7 @@ model Reviews {
 
 model Roles {
   id        Int         @id(map: "PK__Roles__3213E83FA8C1FD6F") @default(autoincrement())
-  name      String?     @unique(map: "UQ__Roles__72E12F1B55A262A5") @db.NVarChar(50)
+  name      String      @unique(map: "UQ__Roles__72E12F1B55A262A5") @db.NVarChar(50)
   UserRoles UserRoles[]
 }
 
