@@ -38,3 +38,14 @@ export const deleteCoupon = async (id: number) => {
     }
     return await couponRepository.deleteCoupon(id);
 };
+
+export const validateCouponByCode = async (code: string) => {
+    const coupon = await couponRepository.getCouponByCode(code);
+    if (!coupon) {
+        throw new Error('Mã giảm giá không tồn tại');
+    }
+    if (new Date(coupon.expired_at) < new Date()) {
+        throw new Error('Mã giảm giá đã hết hạn');
+    }
+    return coupon;
+};

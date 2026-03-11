@@ -5,6 +5,7 @@ import authorization from '../../middlewares/auth/authorization';
 const router = express.Router();
 
 router.get('/', authorization, couponController.getAllCoupons);
+router.get('/validate/:code', couponController.validateCoupon);
 router.get('/:id', couponController.getCouponById);
 router.post('/', authorization, couponController.createCoupon);
 router.put('/:id', authorization, couponController.updateCoupon);
