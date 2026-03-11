@@ -78,12 +78,9 @@ export const errorMiddleware = (
     case 'TOKEN_ALREADY_EXPIRED':
       return res.status(400).json({
         message: 'Token đã hết hạn',
-      }); case 'TOKEN_ALREADY_EXPIRED':
-      return res.status(400).json({
-        message: 'Token đã hết hạn',
       });
     case 'NOT_FOUND_PRODUCT':
-      return res.status(401).json({
+      return res.status(404).json({
         message: 'Không tìm thấy sản phẩm',
       });
     case 'NOT_FOUND_IMAGE':
