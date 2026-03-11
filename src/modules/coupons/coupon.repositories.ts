@@ -22,7 +22,7 @@ export const getCouponById = async (id: number) => {
 
 export const getCouponByCode = async (code: string) => {
     return await prisma.coupons.findUnique({
-        where: { code }
+        where: { code },
     });
 };
 

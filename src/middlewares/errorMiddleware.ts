@@ -167,6 +167,22 @@ export const errorMiddleware = (
       return res.status(403).json({
         message: 'Bạn không có quyền thực hiện hành động này',
       });
+    case 'NOT_ENOUGH_ORDER_VALUE':
+      return res.status(400).json({
+        message: 'Giá trị đơn hàng không đủ để áp dụng mã giảm giá này',
+      });
+    case 'CODE_USAGE_LIMIT_REACHED':
+      return res.status(400).json({
+        message: 'Mã giảm giá đã đạt giới hạn sử dụng',
+      });
+    case 'CODE_EXPIRED':
+      return res.status(400).json({
+        message: 'Mã giảm giá đã hết hạn',
+      });
+    case 'CODE_NOT_FOUND':
+      return res.status(404).json({
+        message: 'Mã giảm giá không tồn tại',
+      });
     default:
       console.error('Unhandled error:', err);
       return res.status(500).json({
