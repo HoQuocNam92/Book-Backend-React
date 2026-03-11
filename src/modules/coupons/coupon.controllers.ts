@@ -70,3 +70,17 @@ export const deleteCoupon = async (req: Request, res: Response) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
+export const validateCoupon = async (req: Request, res: Response) => {
+    try {
+        const code = String(req.params.code);
+        const coupon = await couponService.validateCouponByCode(code);
+        res.status(200).json({
+            success: true,
+            message: 'Mã giảm giá hợp lệ',
+            data: { code: coupon.code, discount: coupon.discount }
+        });
+    } catch (error: any) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
