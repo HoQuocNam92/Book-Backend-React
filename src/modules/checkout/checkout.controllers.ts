@@ -17,7 +17,6 @@ export const placeOrder = async (req: AuthRequest, res: Response, next: NextFunc
             paymentMethod || 'cod',
             appliedCoupon?.coupon_id,
             appliedCoupon?.code,
-            finalAmount
         );
 
         res.status(201).json({ message: 'Đặt hàng thành công', data: order });

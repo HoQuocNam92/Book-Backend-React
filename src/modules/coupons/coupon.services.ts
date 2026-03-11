@@ -40,8 +40,7 @@ export const deleteCoupon = async (id: number) => {
     return await couponRepository.deleteCoupon(id);
 };
 
-export const validateCouponByCode = async (code: string, userId: number, order_total: number) => {
-    console.log("Check code", code);
+export const validateCouponByCode = async (code: string, userId: number) => {
     const coupon = await couponRepository.getCouponByCode(code);
     const cart = await cartRepo.getCartTotalPrice(userId);
     if (cart === null) {
@@ -63,11 +62,10 @@ export const validateCouponByCode = async (code: string, userId: number, order_t
     if (new Date(coupon.expired_at!) < new Date()) {
         throw new Error('CODE_EXPIRED');
     }
-    const total = order_total * (Number(coupon.discount) / 100);
     const discount =
-        total > Number(coupon.max_discount)
+        cart > Number(coupon.max_discount)
             ? Number(coupon.max_discount)
-            : total;
+            : cart;
 
 
 

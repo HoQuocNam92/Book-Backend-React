@@ -84,10 +84,9 @@ export const deleteCoupon = async (req: Request, res: Response, next: NextFuncti
 
 export const validateCoupon = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const order_total = req.body?.finalAmount
         const code = String(req.params.code);
         const user = req.user;
-        const coupon = await couponService.validateCouponByCode(code, Number(user?.id), order_total);
+        const coupon = await couponService.validateCouponByCode(code, Number(user?.id));
         res.status(200).json({
             success: true,
             message: 'Mã giảm giá hợp lệ',
