@@ -1,4 +1,5 @@
 import * as couponRepository from './coupon.repositories';
+import * as cartRepo from '../cart/cart.repositories';
 import { Prisma } from '@prisma/client';
 
 export const createCoupon = async (data: Prisma.CouponsCreateInput) => {
@@ -39,13 +40,39 @@ export const deleteCoupon = async (id: number) => {
     return await couponRepository.deleteCoupon(id);
 };
 
-export const validateCouponByCode = async (code: string) => {
+export const validateCouponByCode = async (code: string, userId: number, order_total: number) => {
+    console.log("Check code", code);
     const coupon = await couponRepository.getCouponByCode(code);
+    const cart = await cartRepo.getCartTotalPrice(userId);
+    if (cart === null) {
+        throw new Error('CART_IS_EMPTY');
+    }
+    if (cart) {
+        if (cart < coupon?.min_order_value!) {
+            console.log('Cart total:', cart);
+            throw new Error('NOT_ENOUGH_ORDER_VALUE');
+        }
+        if (coupon?.usage_limit !== null && coupon?.usage_limit! <= 0) {
+            throw new Error('CODE_USAGE_LIMIT_REACHED');
+        }
+
+    }
     if (!coupon) {
-        throw new Error('Mã giảm giá không tồn tại');
+        throw new Error('CODE_NOT_FOUND');
     }
-    if (new Date(coupon.expired_at) < new Date()) {
-        throw new Error('Mã giảm giá đã hết hạn');
+    if (new Date(coupon.expired_at!) < new Date()) {
+        throw new Error('CODE_EXPIRED');
     }
-    return coupon;
+    const total = order_total * (Number(coupon.discount) / 100);
+    const discount =
+        total > Number(coupon.max_discount)
+            ? Number(coupon.max_discount)
+            : total;
+
+
+
+    return {
+        ...coupon,
+        discount,
+    };
 };

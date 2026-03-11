@@ -4,7 +4,9 @@ import prisma from '../../utils/prisma.js';
 export const placeOrder = async (
     userId: number,
     addressId: number,
-    paymentMethod: string
+    paymentMethod: string,
+    coupon_id?: number,
+    max_discount?: number
 ) => {
     return await prisma.$transaction(async (tx: any) => {
         const cart = await tx.carts.findUnique({
@@ -62,10 +64,21 @@ export const placeOrder = async (
             data: {
                 user_id: userId,
                 address_id: addressId,
-                total,
+                total: max_discount ? total - max_discount : total,
                 status: 'pending',
+                coupon_id: coupon_id
             },
         });
+        if (coupon_id) {
+            await tx.coupons.update({
+                data: {
+                    usage_count: 1
+                },
+                where: {
+                    id: coupon_id
+                }
+            })
+        }
 
         // 4. Create order items
         await tx.orderItems.createMany({

@@ -5,16 +5,19 @@ import * as checkoutServices from './checkout.services.js';
 export const placeOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const userId = req.user!.id;
-        const { address_id, payment_method } = req.body;
+        const { selectedAddress, paymentMethod, appliedCoupon, finalAmount } = req.body;
 
-        if (!address_id) {
+        if (!selectedAddress) {
             return res.status(400).json({ message: 'Vui lòng chọn địa chỉ giao hàng' });
         }
 
         const order = await checkoutServices.placeOrder(
             userId,
-            Number(address_id),
-            payment_method || 'cod'
+            Number(selectedAddress),
+            paymentMethod || 'cod',
+            appliedCoupon?.coupon_id,
+            appliedCoupon?.code,
+            finalAmount
         );
 
         res.status(201).json({ message: 'Đặt hàng thành công', data: order });

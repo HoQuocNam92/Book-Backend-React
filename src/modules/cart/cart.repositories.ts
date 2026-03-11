@@ -148,3 +148,27 @@ export const getCartItemCount = async (userId: number) => {
     });
     return result._sum.quantity || 0;
 };
+
+
+export const getCartTotalPrice = async (userId: number) => {
+    const cart = await prisma.carts.findUnique({ where: { user_id: userId } });
+    if (!cart) return 0;
+    const items = await prisma.cartItems.findMany({
+        where: { cart_id: cart.id },
+        include: {
+            Books: {
+                select: {
+                    price: true,
+                    sale_price: true,
+                    discount_percent: true,
+                },
+            },
+        },
+    });
+    return items.reduce((total, item) => {
+        const price = Number(item.Books?.price || 0);
+        const salePrice = item.Books?.sale_price ? Number(item.Books.sale_price) : 0;
+        const finalPrice = salePrice > 0 ? salePrice : price;
+        return total + finalPrice * (item.quantity || 0);
+    }, 0);
+};
